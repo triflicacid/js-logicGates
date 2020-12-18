@@ -1,0 +1,20 @@
+{
+    // Global setup data
+    "g": {
+        "w", // Width of canvas
+        "h" // Height of canvas
+    },
+
+    // Array of elements (components)
+    "e": {
+        "id", // Numerical ID of component
+        "t", // Type of component (this.constructor.ID value)
+        "d", // Alternate data value for creation (e.g. logic gate type, label)
+        "x", // X-coordinate
+        "y" // Y-coordinate
+    }[],
+
+    // Array of connections
+    // connection format: [src, src_index, dst, dst_index]
+    "c"
+}
