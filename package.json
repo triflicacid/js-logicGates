@@ -1,0 +1,27 @@
+{
+  "name": "js-logicgates",
+  "version": "1.0.0",
+  "description": "Logic Gate circuit builder in JavaScript",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ruben4447/js-logicGates.git"
+  },
+  "author": "Ruben Saunders",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ruben4447/js-logicGates/issues"
+  },
+  "homepage": "https://github.com/ruben4447/js-logicGates#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "socketio": "^1.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.6"
+  }
+}

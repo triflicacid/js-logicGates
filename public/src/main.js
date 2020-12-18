@@ -1,3 +1,5 @@
+const socket = io();
+
 var p5canvas;
 const logicGates = []; // Array of all logic gates
 
@@ -36,7 +38,7 @@ function draw() {
 
     // User-defined loop function
     if (typeof initObject.loop === 'function') initObject.loop(canvas, stateChanged);
-    
+
     // Render
     canvas.render();
 }
