@@ -1,23 +1,10 @@
-class Canvas {
-    #_;
-    #_w;
-    #_h;
-    #els;
-    #nextCID;
-
-    constructor(container, width, height) {
-        // Create P5 canvas
-        this.#_w = width;
-        this.#_h = height;
-        this.#_ = createCanvas(width, height);
-        this.#_.parent(container);
-        this.#_.style("border", "1px solid black");
-
+class Workspace {
+    constructor() {
         /** Object containing all components ('elements') { id: component } */
-        this.#els = {};
+        this._els = {};
 
         /** Next ID for next component */
-        this.#nextCID = 0;
+        this._nextCID = 0;
 
         /** Which component are we hovering over? */
         this.componentOver = null;
@@ -38,14 +25,17 @@ class Canvas {
         this.isFrozen = false;
 
         /** Register: has there been a change in anything? (e.g. state change) ? */
-        this.stateChanged = false;
+        this.stateChanged = true;
+
+        /** Has content been altered? (used for saving) */
+        this.contentAltered = false;
     }
 
     /** Render on this._ */
     render() {
         background(245);
-        for (const id in this.#els) {
-            this.#els[id].render();
+        for (const id in this._els) {
+            this._els[id].render();
         }
 
         if (this.primedDeletion) {
@@ -58,7 +48,7 @@ class Canvas {
             let y = height / 2;
             let x = width / 2;
             text('Delete Component', x, y);
-            
+
             textSize(16);
             fill(50, 60, 230);
             y += 35;
@@ -71,9 +61,9 @@ class Canvas {
      * @param {(component: Component, id: number) => boolean} fn        Callback. Break loop if return false
      */
     forEachComponent(fn) {
-        for (const id in this.#els) {
-            if (this.#els.hasOwnProperty(id)) {
-                if (fn(this.#els[id], id) === false) break;
+        for (const id in this._els) {
+            if (this._els.hasOwnProperty(id)) {
+                if (fn(this._els[id], id) === false) break;
             }
         }
     }
@@ -81,12 +71,13 @@ class Canvas {
     /**
      * Add a component. Return index.
      * @param {Component} component Component to add
+     * @param {number} [id]  Optional ID to force component to be
      * @return {Number} ID of component
      */
-    addComponent(component) {
+    addComponent(component, id = undefined) {
         component.onStateChange = () => this.stateChanged = true;
-        const id = this.#nextCID++;
-        this.#els[id] = component;
+        if (id == undefined) id = this._nextCID++;
+        this._els[id] = component;
         component.id = id;
         return id;
     }
@@ -96,10 +87,10 @@ class Canvas {
      * @param {Number} id           Component ID
      */
     getComponent(id) {
-        return this.#els[id];
+        return this._els[id];
     }
 
-    getComponentCount() { return this.#els.length; }
+    getComponentCount() { return this._els.length; }
 
     /** 
      * Connect two components together (src -> dst)
@@ -109,12 +100,12 @@ class Canvas {
      * @param {number} dst_index    Connection node index
      */
     connectComponents(src, src_index, dst, dst_index) {
-        const src_c = this.#els[src];
+        const src_c = this._els[src];
         if (src_c.outputs.length <= src_index) throw new Error(`Connection source (${src_c.name}) does not have output node with index ${src_index}`);
 
-        const dst_c = this.#els[dst];
+        const dst_c = this._els[dst];
         if (dst_c.inputs.length <= dst_index) throw new Error(`Connection destination (${dst_c.name}) does not have input node with index ${dst_index}`);
-        
+
         src_c.outputs[src_index].c.push(dst_c);
         src_c.outputs[src_index].ci.push(dst_index);
 
@@ -127,7 +118,7 @@ class Canvas {
      * @param {Component} c Component to remove
      */
     removeComponent(c) {
-        if (this.#els.hasOwnProperty(c.id)) {
+        if (this._els.hasOwnProperty(c.id)) {
             // Remove joint connections
             for (let input of c.inputs) {
                 if (input.c) {
@@ -138,13 +129,13 @@ class Canvas {
                         input.c.outputs[input.ci].c.splice(index, 1);
                         input.c.outputs[input.ci].ci.splice(index, 1);
                     }
-                    
+
                     // Remove our version
                     input.c = null;
                     input.ci = NaN;
                 }
             }
-            
+
             for (let output of c.outputs) {
                 for (let i = 0; i < output.c.length; i++) {
                     // Remove conn object stored in output.c[i].inputs array
@@ -155,7 +146,7 @@ class Canvas {
             }
 
             // Actually remove component
-            delete this.#els[c.id];
+            delete this._els[c.id];
         }
     }
 
@@ -163,10 +154,10 @@ class Canvas {
     * EValuate components
     */
     evaluate() {
-        for (let id in this.#els) {
-            if (this.#els.hasOwnProperty(id) && this.#els[id].constructor.name == 'Input') this.#els[id].chain_eval();
+        for (let id in this._els) {
+            if (this._els.hasOwnProperty(id) && this._els[id].constructor.name == 'Input') this._els[id].chain_eval();
         }
-       console.log("Evaluated");
+        console.log("Evaluated");
     }
 
     /**
@@ -176,19 +167,16 @@ class Canvas {
     getAlgebraic(id) {
         const c = this.getComponent(id);
         const trace = c.backtrace();
-        return (c.constructor.name == 'Output' ? `${c.label} = ` : '') + trace.substring(1, trace.length - 1); 
+        return (c.constructor.name == 'Output' ? `${c.label} = ` : '') + trace.substring(1, trace.length - 1);
     }
 
     /**
-     * Get JSON representation of canvas
+     * Get object representation of canvas
      * - See saveDataStructure.txt for more information
      * @return {object} JSON representation of canvas
      */
-    getJSON() {
+    toObject() {
         const json = {};
-
-        // Global information
-        json.g = { w: this.#_w, h: this.#_h };
 
         // Array of components ('elements')
         json.e = [];
@@ -200,16 +188,60 @@ class Canvas {
         this.forEachComponent((c) => {
             let obj = { id: c.id, t: c.constructor.ID, x: c.x, y: c.y };
             if (c.constructor.name == 'LogicGate') obj.d = logicGateTypes.indexOf(c.type);
-            else if (c.constructor.name == 'Input'|| c.constructor.name == 'Output') obj.d = c.label;
+            else if (c.constructor.name == 'Input' || c.constructor.name == 'Output') obj.d = c.label;
             json.e.push(obj);
-            
+
             for (let output of c.outputs) {
                 for (let i = 0; i < output.c.length; i++) {
-                    json.c.push([ c.id, i, output.c[i].id, output.ci[i] ]);
+                    json.c.push([c.id, i, output.c[i].id, output.ci[i]]);
                 }
             }
         });
 
         return json;
+    }
+
+    /**
+     * Create Canvas object from object data
+     * - Expects input equivalent to <instance>.toObject()
+     * @param {object} data - JSON data
+     * @return {Workspace} Canvas object
+     */
+    static fromObject(data) {
+        const workspace = new Workspace();
+        const logicGateTypes = Object.keys(LogicGate.data);
+
+        // Logic gates
+        if (data.e) {
+            for (let el of data.e) {
+                let object;
+                switch (el.t) {
+                    case 0:
+                        object = new Input(el.d, el.x, el.y);
+                        break;
+                    case 1:
+                        object = new Output(el.d, el.x, el.y);
+                        break;
+                    case 2:
+                        object = new Viewer(el.x, el.y);
+                        break;
+                    case 3:
+                        object = new LogicGate(logicGateTypes[el.d], el.x, el.y);
+                        break;
+                    default:
+                        throw new Error('Unknown component type #' + el.t);
+                }
+                workspace.addComponent(object, el.id);
+            }
+        }
+
+        // connections
+        if (data.c) {
+            for (let conn of data.c) {
+                workspace.connectComponents(...conn);
+            }
+        }
+
+        return workspace;
     }
 }

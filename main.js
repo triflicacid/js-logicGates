@@ -1,6 +1,9 @@
 const express = require('express');
 const socketio = require('socket.io');
 
+const Connection = require('./src/connection.js');
+const DataFile = require('./src/data_file.js');
+
 const PORT = 3000;
 
 const app = express();
@@ -9,7 +12,8 @@ const io = socketio(server);
 
 app.use(express.static("public/"));
 
-io.on('connection', socket => {
-  console.log(`Socket connected: ${socket.id}`);
-  socket.emit('message', { msg: 'Hello... Your ID is ' + socket.id });
+DataFile.loadFiles();
+
+io.on('connection', (socket) => {
+  let conn = new Connection(socket);
 });

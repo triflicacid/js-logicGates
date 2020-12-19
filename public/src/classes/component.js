@@ -1,9 +1,4 @@
 class Component {
-    /** State of component
-     * @getter state
-     * @type {0 | 1} */
-    #state = 0;
-
     constructor(x, y) {
         /**
          * List of inputs and outputs connected to us
@@ -19,17 +14,23 @@ class Component {
         this.w = 50;
         this.h = 50;
 
+        /** State of component
+         * @getter state
+         * @type {0 | 1}
+         */
+        this._state = 0;
+
         this.label = ''; // Label for component
 
         this.onStateChange = undefined; // Called whenever state is changed
         this.isHighlighted = false;
     }
 
-    get state() { return this.#state; }
+    get state() { return this._state; }
     set state(s) {
         s = s ? 1 : 0;
-        if (s != this.#state) {
-            this.#state = s;
+        if (s != this._state) {
+            this._state = s;
             if (typeof this.onStateChange === 'function') this.onStateChange();
         }
     }
@@ -47,7 +48,7 @@ class Component {
             stroke(255, 50, 240);
             strokeWeight(1);
             rect(this.x - this.w / 2, this.y - this.h / 2, this.w, this.h);
-            
+
             strokeWeight(7);
             point(this.x, this.y);
         }
@@ -90,7 +91,7 @@ class Component {
             textAlign(CENTER);
             text(this.label, 0, -this.h / 1.7);
         }
-        
+
         pop();
 
         if (this.isHighlighted) {

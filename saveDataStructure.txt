@@ -1,10 +1,4 @@
 {
-    // Global setup data
-    "g": {
-        "w", // Width of canvas
-        "h" // Height of canvas
-    },
-
     // Array of elements (components)
     "e": {
         "id", // Numerical ID of component

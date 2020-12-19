@@ -7,13 +7,30 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.js"></script>
     
-    <link rel="stylesheet" href="./src/style.css">
+    <link rel="stylesheet" href="./style.css">
     <script type="text/javascript" charset="utf-8" src="./src/lib/p5.js"></script>
     <script type="text/javascript" charset="utf-8" src="./src/lib/sound.js"></script>
 
     <link rel="shortcut icon" href="./img/or.png" type="image/png">
 </head>
 <body>
+    <div class="cover"></div>
+    <div class="menu-bar">
+        <ul id="options-nofile">
+            <li><a class="btn" href="javascript:void(0);" onclick="menu.openFile.showPopup(true);">&#128449; Open</a></li>
+            <li><a class="btn" href="javascript:void(0);" onclick="menu.newFile.showPopup(true);">&#65291; New</a></li>
+        </ul>
+        <ul id="options-file">
+            <li><a class="btn" href="javascript:void(0);" onclick="menu.exitFile.exit();">&#9587; Close</a></li>
+            <li><a class="btn" href="javascript:void(0);" onclick="menu.saveFile();">&#128427; Save</a></li>
+            <li><a class="btn" href="javascript:void(0);" onclick="menu.deleteFile.showPopup(true);">&#128465; Delete</a></li>
+        </ul>
+
+        <span id='actionbar'></span>
+    </div>
+
+    <br><br><br><br>
+
     <div id="container"></div>
 
     <br><br>
@@ -22,17 +39,70 @@
 
     <div id="c-info"></div>
 
-    <input type="checkbox" id="is-executing" /> Evaluating
+    <input type="checkbox" id="is-executing" checked="checked" /> Evaluating
+
+    <!-- ================= POPUPS ================= -->
+    <div class="popup" id="popup-open-file">
+        <div class="centre">
+            <h2>Open File</h2>
+        </div>
+        <div id="file-list"></div>
+        <br>
+        <div class="centre">
+            <a class="btn" href="javascript:void(0);" onclick="menu.openFile.showPopup(false);">Close</a>
+        </div>
+    </div>
+    <div class="popup" id="popup-exit-save">
+        <div class="centre">
+            <h2>Save Before Closing?</h2>
+        </div>
+        <p>Save file <span class='current-file'></span> before closing?</p>
+        <div class="centre">
+            <a class="btn" href="javascript:void(0);" onclick="menu.exitFile.popupBtn(true);">Save</a>
+            <a class="btn" href="javascript:void(0);" onclick="menu.exitFile.popupBtn(false);">Close</a>
+        </div>
+    </div>
+    <div class="popup" id="popup-new-file">
+        <div class="centre">
+            <h2>Create New</h2>
+        </div>
+        <span>File Name</span> <input type="text" id="new-file-name" /> <br>
+        <span><abbr title="Password for protection. Optional.">Password</abbr></span> <input type="password" id="new-file-passwd" placeholder="Optional" /> <br>
+        <br>
+        <div class="centre">
+            <a class="btn" href="javascript:void(0);" onclick="menu.newFile.create();">Create</a>
+            <a class="btn" href="javascript:void(0);" onclick="menu.newFile.showPopup(false);">Close</a>
+        </div>
+    </div>
+    <div class="popup centre" id="popup-delete-file">
+        <h2>Delete File?</h2>
+        <p>
+            To delete <span class='current-file'></span>, enter the number below into the text box<br>
+            <span>Number: <code class="noselect" id="delete-file-num"></code></span>
+        </p>
+        <input type="number" id="delete-file-num-input" />
+        <br>
+        <br>
+        <a class="btn" href="javascript:void(0);" onclick="menu.deleteFile.delete();">Delete</a>
+        <a class="btn" href="javascript:void(0);" onclick="menu.deleteFile.showPopup(false);">Cancel</a>
+    </div>
+
+    <!--
+    - ================= SCRIPTS ================= 
+    - Entry Point: src/p5_funcs.js @ setup()
+    -->
+
+    <script type="text/javascript" charset="utf-8" src="./main.js"></script>
 
     <script type="text/javascript" charset="utf-8" src="./src/funcs.js"></script>
-    <script type="text/javascript" charset="utf-8" src="./src/canvas.js"></script>
+    <script type="text/javascript" charset="utf-8" src="./src/workspace.js"></script>
     
     <script type="text/javascript" charset="utf-8" src="./src/classes/component.js"></script>
     <script type="text/javascript" charset="utf-8" src="./src/classes/io.js"></script>
     <script type="text/javascript" charset="utf-8" src="./src/classes/logic_gate.js"></script>
     
-    <script type="text/javascript" charset="utf-8" src="./main.js"></script>
-    <script type="text/javascript" charset="utf-8" src="./src/main.js"></script>
-
+    <script type="text/javascript" charset="utf-8" src="./src/socket.js"></script>
+    <script type="text/javascript" charset="utf-8" src="./src/menu_actions.js"></script>
+    <script type="text/javascript" charset="utf-8" src="./src/p5_funcs.js"></script>
 </body>
 </html>

@@ -1,77 +1,107 @@
-/** Called before initialisation */
-function init() {
-    let checkbox = document.getElementById('is-executing');
-    checkbox.setAttribute('checked', 'checked');
+const app = {
+  /** Canvas for P5 sktches */
+  p5canvas: undefined,
 
-    return {
-        container: 'container',
-        width: 1000,
-        height: 600,
-        componentInfo: 'c-info',
-        evaluate: () => checkbox.checked,
-        loop: (canvas, sc) => {
-            if (sc) {
-                let src = document.getElementById('c-algebra');
-                src.innerHTML = '';
-                src.insertAdjacentElement('beforeend', generateAlgebraTable(canvas));
-            }
-        },
-    };
-}
+  /** Current workspace object which is active
+   * @type {Workspace}
+  */
+  workspace: null,
 
-/** "Entry Point" */
-function main(canvas) {
-    let lg;
+  /** File data */
+  file: {
+    open: false, // Is a file open?
+    name: null,
+    data: null,
+    passwd: null, // Store password used to open file so it doesn't need to be re-entered
+  },
 
-    lg = new Input('a', 50, 200);
-    canvas.addComponent(lg);
+  /** HTML elements for visuals */
+  html: {
+    canvasContainer: document.getElementById('container'),
+    componentInfo: document.getElementById('c-info'),
+    evaluateCheckbox: document.getElementById('is-executing'),
+    booleanAlgebraTable: document.getElementById('c-algebra'),
+    optionsNofile: document.getElementById('options-nofile'),
+    optionsFile: document.getElementById('options-file'),
+    actionbar: document.getElementById('actionbar'),
+    cover: document.getElementsByClassName('cover')[0],
+  },
 
-    lg = new Input('b', 50, 400);
-    canvas.addComponent(lg);
+  init() {
+    socket.init();
+    hide(app.html.canvasContainer, true);
+    hide(app.html.optionsFile, true);
+    hide(app.html.cover, true);
+    for (let el of document.getElementsByClassName('popup')) hide(el, true);
+  },
 
-    lg = new LogicGate("and", 200, 300);
-    canvas.addComponent(lg);
+  /**
+   * Open a new workspace from data
+   * - Get file data from app.file.*
+  */
+  openWorkspace() {
+    if (this.workspace) {
+      alert('A workspace is already open');
+    } else {
+      let json;
+      try {
+        json = JSON.parse(this.file.data);
+      } catch {
+        this.message(`File ${this.file.name} is corrupted and cannot be opened`, ERROR);
+        return;
+      }
 
-    lg = new Viewer(300, 300);
-    canvas.addComponent(lg);
+      this.workspace = Workspace.fromObject(json);
+      hide(this.html.canvasContainer, false);
+      hide(this.html.optionsNofile, true);
+      hide(this.html.optionsFile, false);
+      for (let el of document.getElementsByClassName('current-file')) el.innerText = this.file.name;
+      this.html.actionbar.innerText = "File: " + this.file.name;
+      loop();
+    }
+  },
 
-    lg = new LogicGate("buffer", 400, 300);
-    canvas.addComponent(lg);
+  /** Close workspace */
+  closeWorkspace() {
+    if (this.workspace) {
+      this.workspace = null;
+      hide(this.html.canvasContainer, true);
+      hide(this.html.optionsNofile, false);
+      hide(this.html.optionsFile, true);
 
-    lg = new Output('z', 550, 300);
-    canvas.addComponent(lg);
+      // Clear file info
+      app.file.open = false;
+      app.file.name = app.file.passwd = app.file.data = null;
+      app.html.actionbar.innerText = '';
 
-    canvas.connectComponents(0, 0, 2, 0);
-    canvas.connectComponents(1, 0, 2, 1);
-    canvas.connectComponents(2, 0, 3, 0);
-    canvas.connectComponents(3, 0, 4, 0);
-    canvas.connectComponents(4, 0, 5, 0);
-}
+      noLoop();
+    }
+  },
 
-function generateAlgebraTable(canvas) {
-    const table = document.createElement('table');
-    table.insertAdjacentHTML('beforeend', `<tr><th>Algebraic</th><th>Substituted</th></tr>`);
+  /** 
+   * Show message
+   * @param {string} msg
+   * @param {number} lvl - Level of message. -1: log, 0: info, 1: warning, 2: error
+  */
+  message(msg, lvl = 0) {
+    switch (lvl) {
+      case -1:
+        console.log('[LOG] %c' + msg, 'font-style:italic;color:gray;');
+        break;
+      case 1:
+        console.warn('[WARNING] ' + msg);
+        break;
+      case 2:
+        Sounds.get("error").play(); // THis ensures the sound cannot be stacked
+        console.error('[ERROR] ' + msg);
+        alert(`-- Error --\n${msg}`);
+        break;
+      default:
+        console.log('[SERVER] %c' + msg, 'font-style:italic;color:gray;');
+        alert(msg);
+    }
+  },
+};
 
-    let count = 0;
-    canvas.forEachComponent((c) => {
-        if (c.constructor.name == 'Output') {
-            count++;
-            let str = c.backtrace();
-            if (str[0] == '(') str = str.substr(1, str.length - 2);
-
-            let strSub = c.backtrace(true);
-            if (strSub[0] == '(') strSub = strSub.substr(1, strSub.length - 2);
-
-            let state = Component.StyledAlgebra ? getHTMLState(c.state) : c.state;
-
-            table.innerHTML += `<tr><td>${c.label} = ${str}</td><td>${c.label} = ${strSub} = ${state}</td></tr>`;
-        }
-    });
-    if (count == 0) table.insertAdjacentHTML('beforeend', `<td colspan='5'><i>No output components</i></td>`);
-
-    return table;
-}
-
-io.on('message', data => {
-    console.log('[SERVER] %c' + data.msg, 'font-style:italic;color:gray;');
-});
+const INFO = 0;
+const ERROR = 2;
