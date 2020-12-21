@@ -97,9 +97,13 @@ const getConn = (workspace, tuple) => workspace.getComponent(tuple[0])[tuple[1] 
 /**
  * Given a conn object, remove the connection
  * - NB modified the object
- * @param {object} obj connection object 
+ * @param {Component} comp  Source component
+ * @param {boolean} isInput     Is connection from input>
+ * @param {object} cindex       Index of connection
  */
-function removeConn(obj) {
+function removeConn(comp, isInput, cindex) {
+    const obj = comp[isInput ? 'inputs' : 'outputs'][cindex];
+
     if (Array.isArray(obj.c)) {
         // OUTPUT connection
         for (let i = 0; i < obj.c.length; i++) {
@@ -112,7 +116,8 @@ function removeConn(obj) {
     } else if (obj.c) {
         // INPUT connection
         // Find stored index in input component, and remove their copy of a connection object
-        let index = obj.c.outputs[obj.ci].c.indexOf(obj.c);
+        let index = obj.c.outputs[obj.ci].c.indexOf(comp);
+        console.log(index)
         if (index != -1) {
             obj.c.outputs[obj.ci].c.splice(index, 1);
             obj.c.outputs[obj.ci].ci.splice(index, 1);
@@ -122,6 +127,7 @@ function removeConn(obj) {
         obj.c = null;
         obj.ci = NaN;
     }
+    console.log(obj)
 }
 
 /** Round given coordinate (number) to an appropriate degree */

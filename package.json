@@ -2,10 +2,10 @@
   "name": "js-logicgates",
   "version": "1.0.0",
   "description": "Logic Gate circuit builder in JavaScript",
-  "main": "main.js",
+  "main": "src/main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon main.js"
+    "start": "nodemon ./src/main.js"
   },
   "repository": {
     "type": "git",

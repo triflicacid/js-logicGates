@@ -1,8 +1,8 @@
 const express = require('express');
 const socketio = require('socket.io');
 
-const Connection = require('./src/connection.js');
-const DataFile = require('./src/data_file.js');
+const Connection = require('./connection.js');
+const DataFile = require('./data_file.js');
 
 const PORT = 3000;
 
@@ -14,6 +14,4 @@ app.use(express.static("public/"));
 
 DataFile.loadFiles();
 
-io.on('connection', (socket) => {
-  let conn = new Connection(socket);
-});
+io.on('connection', (socket) => new Connection(socket));

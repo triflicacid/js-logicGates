@@ -56,7 +56,11 @@ class LogicGate extends Component {
 
     getPopupText() {
         const arr = super.getPopupText();
-        arr.push("Rep: " + LogicGate.data[this._type].txt('a', 'b'));
+
+        let args = [this.getInputState(0)];
+        if (this.inputs.length != 1) args.push(this.getInputState(1));
+
+        arr.push(LogicGate.data[this._type].txt(...args) + ' = ' + this.state);
         return arr;
     }
 

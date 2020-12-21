@@ -57,20 +57,52 @@ const menu = {
    * @param {boolean} closeAfter  Close file after save?
    * */
   saveFile(closeAfter) {
-    if (app.workspace && typeof app.file.name == 'string') {
-      try {
-        let data = app.workspace.toObject();
-        data = JSON.stringify(data);
-        socket.writeFile.request(app.file.name, app.file.passwd, data, closeAfter);
-        return true;
-      } catch (e) {
-        console.error(e);
-        app.message(`Error saving ${app.file.name}`, ERROR);
-        return false;
+    if (app.workspace) {
+      if (app.file.name) {
+        try {
+          let data = app.workspace.toObject();
+          data = JSON.stringify(data);
+          socket.writeFile.request(app.file.name, app.file.passwd, data, closeAfter);
+          return true;
+        } catch (e) {
+          console.error(e);
+          app.message(`Error saving ${app.file.name}`, ERROR);
+          return false;
+        }
+      } else {
+        menu.saveAs.showPopup(true);
       }
     } else {
       app.message('Nothing to save', ERROR);
       return false;
+    }
+  },
+
+  /** Save As */
+  saveAs: {
+    _: document.getElementById('popup-saveas'),
+    inputName: document.getElementById('saveas-name'),
+    inputPasswd: document.getElementById('saveas-passwd'),
+    openAfter: true, // Flag for callback - open file after saveAs?
+
+    showPopup(show) {
+      hide(app.html.cover, !show);
+      hide(this._, !show);
+    },
+
+    save() {
+      if (app.workspace) {
+        let name = this.inputName.value;
+        let passwd = this.inputPasswd.value;
+        let data = JSON.stringify(app.workspace.toObject());
+
+        app.file.open = true;
+        app.file.name = name;
+        app.file.passwd = passwd;
+        app.file.data = data;
+        app.workspace = null;
+        socket.newFile.request(name, passwd, data);
+      } else app.message("No workspace to save", ERROR);
     }
   },
 
@@ -89,17 +121,6 @@ const menu = {
      * @default ignore=false
      */
     exit(ignore = false) {
-      if (app.workspace && typeof app.file.name === 'string') {
-        if (!ignore && app.workspace.contentAltered) {
-          // Not up-to-date
-          this.showPopup(true);
-        } else {
-          app.closeWorkspace();
-        }
-      } else {
-        // app.message('No file to close', ERROR);
-      }
-
       if (app.workspace) {
         if (app.file.name && !ignore && app.workspace.contentAltered) {
           // Not up-to-date... Prompt to save
@@ -127,23 +148,6 @@ const menu = {
     }
   },
 
-  /** Create new file */
-  newFile: {
-    _: document.getElementById('popup-new-file'),
-    inputName: document.getElementById('new-file-name'),
-    inputPasswd: document.getElementById('new-file-passwd'),
-
-    showPopup(show) {
-      hide(app.html.cover, !show);
-      hide(this._, !show);
-    },
-
-    create() {
-      let fname = this.inputName.value, passwd = this.inputPasswd.value;
-      socket.newFile.request(fname, passwd.length == 0 ? null : passwd);
-    },
-  },
-
   /** Delete a file */
   deleteFile: {
     _: document.getElementById('popup-delete-file'),
@@ -166,16 +170,21 @@ const menu = {
     },
 
     delete() {
-      if (app.workspace && typeof app.file.name == 'string') {
-        if (this.num != +this.inputNum.value) {
-          this.showPopup(false);
-          app.message(`Entered number was incorrect`, ERROR);
+      if (app.workspace) {
+        if (app.file.name) {
+          if (this.num != +this.inputNum.value) {
+            this.showPopup(false);
+            app.message(`Entered number was incorrect`, ERROR);
+          } else {
+            this.showPopup(false);
+            socket.deleteFile.request(app.file.name, app.file.passwd);
+          }
         } else {
           this.showPopup(false);
-          socket.deleteFile.request(app.file.name, app.file.passwd);
+          app.closeWorkspace();
         }
       } else {
-        app.message('No file to delete', ERROR);
+        app.message('Nothing to delete', ERROR);
       }
     }
   },

@@ -18,19 +18,18 @@
     <div class="menu-bar">
         <ul class="inline" id="options-nofile">
             <li><a class="btn" href="javascript:void(0);" onclick="menu.openFile.showPopup(true);">&#128449; Open</a></li>
-            <li><a class="btn" href="javascript:void(0);" onclick="menu.newFile.showPopup(true);">&#65291; New</a></li>
+            <li><a class="btn" href="javascript:void(0);" onclick="app.openWorkspace();">&#65291; New</a></li>
         </ul>
         <ul class="inline" id="options-file">
             <li><a class="btn" href="javascript:void(0);" onclick="menu.exitFile.exit();">&#9587; Close</a></li>
             <li><a class="btn" href="javascript:void(0);" onclick="menu.saveFile();">&#128427; Save</a></li>
+            <li><a class="btn" href="javascript:void(0);" onclick="menu.saveAs.showPopup(true);">&#128393; Save As</a></li>
             <li><a class="btn" href="javascript:void(0);" onclick="menu.deleteFile.showPopup(true);">&#128465; Delete</a></li>
             <li><a class="btn" href="javascript:void(0);" onclick="menu.toggleNav();">Toggle Menu</a></li>
         </ul>
-
-        <span id='actionbar'></span>
     </div>
 
-    <div id="main">
+    <div id="main" oncontextmenu="return false;">
         <div id="nav" class="noselect striped">
             <span>I/O</span>
             <div>
@@ -54,6 +53,15 @@
 
     <div id="c-algebra"></div>
 
+    <div id="statusbar" class="striped">
+        <div>
+            File: <span id='statusbar-file'></span>
+        </div>
+        <div>
+            Up-to-date: <span id='statusbar-uptodate'></span>
+        </div>
+    </div>
+
     <!-- ================= POPUPS ================= -->
     <div class="popup" id="popup-open-file">
         <div class="centre">
@@ -75,16 +83,16 @@
             <a class="btn" href="javascript:void(0);" onclick="menu.exitFile.popupBtn(false);">Close</a>
         </div>
     </div>
-    <div class="popup" id="popup-new-file">
+    <div class="popup" id="popup-saveas">
         <div class="centre">
-            <h2>Create New</h2>
+            <h2>Save As</h2>
         </div>
-        <span>File Name</span> <input type="text" id="new-file-name" /> <br>
-        <span><abbr title="Password for protection. Optional.">Password</abbr></span> <input type="password" id="new-file-passwd" placeholder="Optional" /> <br>
+        <span>File Name</span> <input type="text" id="saveas-name" /> <br>
+        <span><abbr title="Password for protection. Optional.">Password</abbr></span> <input type="password" id="saveas-passwd" placeholder="Optional" /> <br>
         <br>
         <div class="centre">
-            <a class="btn" href="javascript:void(0);" onclick="menu.newFile.create();">Create</a>
-            <a class="btn" href="javascript:void(0);" onclick="menu.newFile.showPopup(false);">Close</a>
+            <a class="btn" href="javascript:void(0);" onclick="menu.saveAs.save();">Save</a>
+            <a class="btn" href="javascript:void(0);" onclick="menu.saveAs.showPopup(false);">Cancel</a>
         </div>
     </div>
     <div class="popup centre" id="popup-delete-file">

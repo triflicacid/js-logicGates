@@ -63,6 +63,7 @@ class Connection {
       } else {
         if (typeof data.passwd != 'string' || data.passwd.length == 0) data.passwd = null;
         let obj = DataFile.create(data.name, data.passwd);
+        if (data.data) obj.writeData(data.data); // Write data to file if provided
         this._.emit('created-file', obj.name);
       }
     });

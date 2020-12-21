@@ -42,9 +42,47 @@ const app = {
     booleanAlgebraTable: document.getElementById('c-algebra'),
     optionsNofile: document.getElementById('options-nofile'),
     optionsFile: document.getElementById('options-file'),
-    actionbar: document.getElementById('actionbar'),
     cover: document.getElementsByClassName('cover')[0],
     nav: document.getElementById('nav'),
+  },
+
+  /** Status bar things */
+  statusbar: {
+    _: document.getElementById('statusbar'),
+    items: [["File", "none"]],
+    render() {
+      this._.innerHTML = '';
+      for (let item of this.items) {
+        this._.insertAdjacentHTML('beforeend', `<div>${item[0]}: ${item[1]}</div>`);
+      }
+    },
+    changeItem(item, value) {
+      for (let i = 0; i < this.items.length; i++) {
+        if (this.items[i][0] == item) {
+          this.items[i][1] = value;
+          this.render();
+          return true;
+        }
+      }
+      return false;
+    },
+    removeItem(item) {
+      for (let i = 0; i < this.items.length; i++) {
+        if (this.items[i][0] == item) {
+          this.items.splice(i, 1);
+          this.render();
+          return true;
+        }
+      }
+      return false;
+    },
+
+    /** Edit or add item */
+    item(item, value) {
+      if (this.changeItem(item, value)) return;
+      this.items.push([item, value]);
+      this.render();
+    },
   },
 
   init() {
@@ -54,6 +92,7 @@ const app = {
     hide(this.html.cover, true);
     for (let el of document.getElementsByClassName('popup')) hide(el, true);
     document.body.addEventListener('click', this.stopInsert);
+
   },
 
   /**
@@ -83,16 +122,16 @@ const app = {
         }
 
         this.workspace = Workspace.fromObject(json);
-        this.html.actionbar.innerText = "File: " + this.file.name;
+        this.statusbar.item('File', this.file.name);
       } else {
         app.workspace = new Workspace();
-        this.html.actionbar.innerText = "Blank Workspace";
+        this.statusbar.item('File', '*New*');
       }
+      this.statusbar.item('Up-To-Date', 'Yes');
       hide(this.html.canvasContainer, false);
       hide(this.html.optionsNofile, true);
       hide(this.html.optionsFile, false);
       for (let el of document.getElementsByClassName('current-file')) el.innerText = this.file.name;
-      loop();
     }
   },
 
@@ -107,9 +146,8 @@ const app = {
       // Clear file info
       app.file.open = false;
       app.file.name = app.file.passwd = app.file.data = null;
-      app.html.actionbar.innerText = '';
-
-      noLoop();
+      app.statusbar.removeItem('File');
+      app.statusbar.removeItem('Up-To-Date');
     }
   },
 
@@ -125,6 +163,7 @@ const app = {
         break;
       case 1:
         console.warn('[WARNING] ' + msg);
+        alert(msg);
         break;
       case 2:
         Sounds.get("error").play(); // THis ensures the sound cannot be stacked
@@ -178,6 +217,7 @@ const app = {
         let c = Workspace.createComponent(...app.insertData, x, y);
         if (c) {
           app.workspace.addComponent(c);
+          app.workspace.contentAltered = true;
         }
         app.insertData = null;
         document.body.classList.remove('dragging');
@@ -187,4 +227,5 @@ const app = {
 };
 
 const INFO = 0;
+const WARNING = 1;
 const ERROR = 2;

@@ -26,16 +26,20 @@ const socket = {
     this._.on('created-file', fname => typeof this.newFile.callback == 'function' && this.newFile.callback(fname));
     this.newFile.callback = fname => {
       // If this is called, must be no errors
-      menu.newFile.showPopup(false);
+      menu.saveAs.showPopup(false);
       app.message(`File created: ${fname}`, INFO);
-      menu.newFile.inputName.value = '';
-      menu.newFile.inputPasswd.value = '';
+      menu.saveAs.inputName.value = '';
+      menu.saveAs.inputPasswd.value = '';
+
+      // Open file?
+      if (menu.saveAs.openAfter) app.openWorkspace();
     };
 
     // Delete file
     this._.on('deleted-file', fname => typeof this.deleteFile.callback == 'function' && this.deleteFile.callback(fname));
     this.deleteFile.callback = fname => {
       app.closeWorkspace();
+      app.message(`Delete file ${fname}`, INFO);
     };
   },
 
@@ -99,11 +103,14 @@ const socket = {
      * Create file
      * @param {string} name  Name of file to create
      * @param {string | null} passwd  Password to protect file with
+     * @param {string | undefined} data   Data to write to file
      * @param {Function | null} callback
      */
-    request(name, passwd = null, callback = undefined) {
+    request(name, passwd = null, data = undefined, callback = undefined) {
       if (callback !== undefined) this.callback = callback;
-      socket._.emit('create-file', { name, passwd });
+      let obj = { name, passwd };
+      if (typeof data === 'string') obj.data = data;
+      socket._.emit('create-file', obj);
     }
   },
 

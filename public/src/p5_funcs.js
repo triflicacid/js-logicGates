@@ -10,7 +10,6 @@ function setup() {
     Sounds.create('error', './sound/error.mp3');
 
     frameRate(app.fps);
-    noLoop();
 
     if (typeof window.main == 'function') {
         app.tryCatchWrap(window.main);
@@ -22,7 +21,7 @@ function draw() {
     if (app.workspace) {
         if (app.file.name && app.workspace.contentAltered != lastChangeAlteredValue) {
             lastChangeAlteredValue = app.workspace.contentAltered;
-            app.html.actionbar.innerText = `File: ${app.file.name} ` + (app.workspace.contentAltered ? '(unsaved)' : '');
+            app.statusbar.item('Up-To-Date', app.workspace.contentAltered ? 'No' : 'Yes');
         }
 
         // Evaluate / show info
@@ -135,6 +134,7 @@ function mouseReleased() {
                 // Is input connector, and not connected
                 if (conn.c == null) {
                     app.workspace.connectComponents(app.workspace.connNodeOver[0], app.workspace.connNodeOver[2], over[0], over[2]);
+                    app.workspace.contentAltered = true;
                 } else console.log("Already connected");
             } else console.log("Can only connect output -> input");
         } else console.log("Destination is not a node");
@@ -167,8 +167,8 @@ function keyPressed() {
                 app.workspace.componentOver.isHighlighted = true;
             } else if (app.workspace.connNodeOver) {
                 // Remove all connections?
-                let obj = getConn(app.workspace, app.workspace.connNodeOver);
-                removeConn(obj);
+                removeConn(app.workspace._els[app.workspace.connNodeOver[0]], app.workspace.connNodeOver[1], app.workspace.connNodeOver[2]);
+                app.workspace.contentAltered = true;
             }
         }
     }

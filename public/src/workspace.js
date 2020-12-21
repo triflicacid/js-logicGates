@@ -61,11 +61,10 @@ class Workspace {
         if (this.connTo != null) {
             let c = this._els[this.connNodeOver[0]];
             let node = c[this.connNodeOver[1] ? "inputs" : "outputs"][this.connNodeOver[2]];
-            let start = [c.x + node.x, c.y + node.y];
 
             noFill();
             stroke(255, 0, 200);
-            drawCurve(start, this.connTo);
+            drawCurve([c.x + node.x, c.y + node.y], this.connTo);
         }
 
         for (const id in this._els) this._els[id].render();
@@ -143,7 +142,8 @@ class Workspace {
      */
     addComponent(component, id = undefined) {
         component.onStateChange = () => this.stateChanged = true;
-        if (id == undefined) id = this._nextCID++;
+        if (id == undefined) while (this._els[this._nextCID]) this._nextCID++;
+        id = this._nextCID++;
         this._els[id] = component;
         component.id = id;
         return id;
@@ -156,8 +156,6 @@ class Workspace {
     getComponent(id) {
         return this._els[id];
     }
-
-    getComponentCount() { return this._els.length; }
 
     /** 
      * Connect two components together (src -> dst)
@@ -233,7 +231,7 @@ class Workspace {
      * @param {number} id       ID of output component to trace back from
      */
     getAlgebraic(id) {
-        const c = this.getComponent(id);
+        const c = this._els[id];
         const trace = c.backtrace();
         return (c.constructor.name == 'Output' ? `${c.label} = ` : '') + trace.substring(1, trace.length - 1);
     }
@@ -255,8 +253,9 @@ class Workspace {
         let logicGateTypes = Object.keys(LogicGate.data);
         this.forEachComponent((c) => {
             let obj = { id: c.id, t: c.constructor.ID, x: c.x, y: c.y };
+            if (typeof c.label == 'string' && c.label.length != 0) obj.l = c.label;
             if (c.constructor.name == 'LogicGate') obj.d = logicGateTypes.indexOf(c.type);
-            else if (c.constructor.name == 'Input' || c.constructor.name == 'Output') obj.d = c.label;
+            else if (c.constructor.name == 'Input' && c.state == 1) obj.d = c.state;
             json.e.push(obj);
 
             for (let output of c.outputs) {
@@ -273,16 +272,19 @@ class Workspace {
      * Create a component
      * @param {number} type         Numeric ID of type 
      * @param {any} data            Other data
+     * @param {string} label        Component's label
      * @param {number} x The x position of the component
      * @param {number} y The y position of the component
      * @return {Component | null} The created component (or null if type unknown)
      */
-    static createComponent(type, data, x, y) {
+    static createComponent(type, data, label, x, y) {
         switch (type) {
             case 0:
-                return new Input(data, x, y);
+                var c = new Input(label, x, y);
+                c._state = data ? 1 : 0;
+                return c;
             case 1:
-                return new Output(data, x, y);
+                return new Output(label, x, y);
             case 2:
                 return new LogicGate(LogicGate.types[data], x, y);
             default:
@@ -298,12 +300,11 @@ class Workspace {
      */
     static fromObject(data) {
         const workspace = new Workspace();
-        const logicGateTypes = Object.keys(LogicGate.data);
 
         // Logic gates
         if (data.e) {
             for (let el of data.e) {
-                let object = Workspace.createComponent(el.t, el.d, el.x, el.y);
+                let object = Workspace.createComponent(el.t, el.d, el.l, el.x, el.y);
                 if (object) workspace.addComponent(object, el.id);
             }
         }

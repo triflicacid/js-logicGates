@@ -1,4 +1,6 @@
 function main() {
+  menu.openFile.open({ name: 'test2', passwd: 'hallo' });
+  return 0;
   app.openWorkspace();
 
   app.workspace.addComponent(new Input("a", 100, 100));
