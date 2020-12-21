@@ -16,30 +16,43 @@
 <body>
     <div class="cover"></div>
     <div class="menu-bar">
-        <ul id="options-nofile">
+        <ul class="inline" id="options-nofile">
             <li><a class="btn" href="javascript:void(0);" onclick="menu.openFile.showPopup(true);">&#128449; Open</a></li>
             <li><a class="btn" href="javascript:void(0);" onclick="menu.newFile.showPopup(true);">&#65291; New</a></li>
         </ul>
-        <ul id="options-file">
+        <ul class="inline" id="options-file">
             <li><a class="btn" href="javascript:void(0);" onclick="menu.exitFile.exit();">&#9587; Close</a></li>
             <li><a class="btn" href="javascript:void(0);" onclick="menu.saveFile();">&#128427; Save</a></li>
             <li><a class="btn" href="javascript:void(0);" onclick="menu.deleteFile.showPopup(true);">&#128465; Delete</a></li>
+            <li><a class="btn" href="javascript:void(0);" onclick="menu.toggleNav();">Toggle Menu</a></li>
         </ul>
 
         <span id='actionbar'></span>
     </div>
 
-    <br><br><br><br>
+    <div id="main">
+        <div id="nav" class="noselect striped">
+            <span>I/O</span>
+            <div>
+                <div onclick="app.startInsert(0);"><img src="img/input.png" /><br><span>Input</span></div>
+                <div onclick="app.startInsert(1);"><img src="img/output.png" /><br><span>Output</span></div>
+            </div>
 
-    <div id="container"></div>
-
-    <br><br>
+            <span>Logic Gates</span>
+            <div>
+                <div onclick="app.startInsert(2, 1);"><img src="img/not.png" /><br><span>Not</span></div>
+                <div onclick="app.startInsert(2, 2);"><img src="img/and.png" /><br><span>And</span></div>
+                <div onclick="app.startInsert(2, 3);"><img src="img/or.png" /><br><span>Or</span></div>
+                <div onclick="app.startInsert(2, 4);"><img src="img/xor.png" /><br><span>Xor</span></div>
+                <div onclick="app.startInsert(2, 5);"><img src="img/nor.png" /><br><span>Nor</span></div>
+                <div onclick="app.startInsert(2, 6);"><img src="img/nand.png" /><br><span>Nand</span></div>
+                <div onclick="app.startInsert(2, 7);"><img src="img/xnor.png" /><br><span>Xnor</span></div>
+            </div>
+        </div>
+        <div id="container"></div>
+    </div>
 
     <div id="c-algebra"></div>
-
-    <div id="c-info"></div>
-
-    <input type="checkbox" id="is-executing" checked="checked" /> Evaluating
 
     <!-- ================= POPUPS ================= -->
     <div class="popup" id="popup-open-file">
@@ -89,10 +102,11 @@
 
     <!--
     - ================= SCRIPTS ================= 
-    - Entry Point: src/p5_funcs.js @ setup()
+    - External Entry Point: main.js @ main
+    - Internal Entry Point: src/p5_funcs.js @ setup()
     -->
 
-    <script type="text/javascript" charset="utf-8" src="./main.js"></script>
+    <script type="text/javascript" charset="utf-8" src="./src/app.js"></script>
 
     <script type="text/javascript" charset="utf-8" src="./src/funcs.js"></script>
     <script type="text/javascript" charset="utf-8" src="./src/workspace.js"></script>
@@ -102,7 +116,9 @@
     <script type="text/javascript" charset="utf-8" src="./src/classes/logic_gate.js"></script>
     
     <script type="text/javascript" charset="utf-8" src="./src/socket.js"></script>
-    <script type="text/javascript" charset="utf-8" src="./src/menu_actions.js"></script>
+    <script type="text/javascript" charset="utf-8" src="./src/menu.js"></script>
     <script type="text/javascript" charset="utf-8" src="./src/p5_funcs.js"></script>
+    
+    <script type="text/javascript" charset="utf-8" src="./main.js"></script>
 </body>
 </html>

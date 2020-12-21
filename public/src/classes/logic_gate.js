@@ -17,8 +17,11 @@ class LogicGate extends Component {
     }
 
     get type() { return this._type; }
-    get symbol() { return LogicGate.data[this._type].symbol; }
-    get name() { return `LogicGate(${this._type})`; }
+    get name() { return capitalise(this._type) + " Gate"; }
+
+    /**
+     * Get text representation of logic gates
+     */
 
     /**
      * Update component state
@@ -36,7 +39,7 @@ class LogicGate extends Component {
     render() {
         super.render(() => {
             noFill();
-            
+
             if (LogicGate.data[this._type].img) {
                 image(LogicGate.data[this._type].img, -this.w / 2, -this.h / 2);
             } else {
@@ -53,24 +56,21 @@ class LogicGate extends Component {
 
     getPopupText() {
         const arr = super.getPopupText();
-        arr[0][1] = `Logic Gate (${this._type})`;
-
-        const equation = this.inputs.length == 1 ? (this.symbol + "A") : ("A" + this.symbol + "B");
-        arr.push(["Rep", equation]);
+        arr.push("Rep: " + LogicGate.data[this._type].txt('a', 'b'));
         return arr;
     }
 
     /** @override */
     backtrace(subin) {
-        const unknown = subin ? (Component.StyledAlgebra ? getHTMLState(0) : '0') : (Component.StyledAlgebra ? getHTMLUnknown() : '?');
+        const unknown = subin ? '0' : '?';
 
         let str;
         const a = this.inputs[0].c ? this.inputs[0].c.backtrace(subin) : unknown;
         if (this.inputs.length == 1) {
-            str = this.symbol + a;
+            str = LogicGate.data[this._type].txt(a);
         } else {
             const b = this.inputs[1].c ? this.inputs[1].c.backtrace(subin) : unknown;
-            str = a + this.symbol + b;
+            str = LogicGate.data[this._type].txt(a, b);
         }
         return "(" + str + ")";
     }
@@ -79,22 +79,23 @@ class LogicGate extends Component {
 const initLogicGateData = () => {
     // Info for logic gates
     LogicGate.data = {
-        buffer: { w: 60, h: 46, fn: a => a, inputs: [[0, 23]], output: [59, 23], symbol: '' },
-        not: { w: 61, h: 46, fn: a => !a, inputs: [[0, 23]], output: [60, 23], symbol: '¬' },
-        and: { w: 61, h: 43, fn: (a, b) => a && b, inputs: [[0, 11], [0, 31]], output: [60, 21], symbol: '⋅' },
-        or: { w: 61, h: 50, fn: (a, b) => a || b, inputs: [[0, 15], [0, 34]], output: [60, 25], symbol: '+' },
-        xor: { w: 64, h: 50, fn: (a, b) => (a && !b) || (!a && b), inputs: [[0, 15], [0, 34]], output: [63, 25], symbol: '⊕' },
-
-        // nor: { symbol: '&darr;' },
-        // nand: { symbol: '&uarr;' },
-        // xnor: { symbol: '&#8857;' },
+        buffer: { w: 60, h: 46, fn: a => a, inputs: [[0, 23]], output: [59, 23], txt: a => a, },
+        not: { w: 61, h: 46, fn: a => !a, inputs: [[0, 23]], output: [60, 23], txt: a => '¬' + a, },
+        and: { w: 61, h: 43, fn: (a, b) => a && b, inputs: [[0, 11], [0, 31]], output: [60, 21], txt: (a, b) => `${a}⋅${b}`, },
+        or: { w: 61, h: 50, fn: (a, b) => a || b, inputs: [[0, 15], [0, 34]], output: [60, 25], txt: (a, b) => `${a}+${b}`, },
+        xor: { w: 64, h: 50, fn: (a, b) => (a && !b) || (!a && b), inputs: [[0, 15], [0, 34]], output: [63, 25], txt: (a, b) => `${a}⊕${b}`, },
+        nor: { w: 61, h: 50, fn: (a, b) => !(a || b), inputs: [[0, 15], [0, 34]], output: [60, 25], txt: (a, b) => `¬(${a}+${b})`, },
+        nand: { w: 60, h: 42, fn: (a, b) => !(a && b), inputs: [[0, 11], [0, 30]], output: [59, 21], txt: (a, b) => `¬(${a}⋅${b})`, },
+        xnor: { w: 65, h: 50, fn: (a, b) => (a && b) || (!a && !b), inputs: [[0, 15], [0, 34]], output: [64, 25], txt: (a, b) => `¬(${a}⊕${b})`, },
     };
+    LogicGate.types = [];
 
     for (const gate in LogicGate.data) {
         if (LogicGate.data.hasOwnProperty(gate)) {
             LogicGate.data[gate].img = loadImage(`./img/${gate}.png`);
+            LogicGate.types.push(gate);
         }
     }
 };
 
-LogicGate.ID = 3;
+LogicGate.ID = 2;

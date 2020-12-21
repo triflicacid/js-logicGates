@@ -9,6 +9,9 @@ class Workspace {
         /** Which component are we hovering over? */
         this.componentOver = null;
 
+        /** How many draw() calls have we been over this.componentOver for (without moving) ? */
+        this.componentOverTicks = NaN;
+
         /** Coordinates of last this.componentOver */
         this.overCoords = [NaN, NaN];
 
@@ -21,22 +24,51 @@ class Workspace {
         /** Primed deletion of component? */
         this.primedDeletion = false;
 
-        /** Frozen: disallows any interaction */
-        this.isFrozen = false;
-
         /** Register: has there been a change in anything? (e.g. state change) ? */
         this.stateChanged = true;
 
         /** Has content been altered? (used for saving) */
         this.contentAltered = false;
+
+        /**
+         * Are we over a connection node?
+         * @type {[number, boolean, number] | null} [component id, isInput?, conn index]
+         */
+        this.connNodeOver = null;
+
+        /**
+         * Making connection to this position
+         * @type {[number, number] | null}
+        */
+        this.connTo = null;
     }
 
     /** Render on this._ */
     render() {
-        background(245);
-        for (const id in this._els) {
-            this._els[id].render();
+        // GRID
+        background(250);
+        let every = app.opts.gridw;
+        if (every > 0 && !isNaN(every)) {
+            strokeWeight(1);
+            stroke(9, 51);
+            for (let x = 0; x < width; x += every) line(x, 0, x, height);
+            for (let y = 0; y < height; y += every) line(0, y, width, y);
         }
+
+        for (const id in this._els) this._els[id].renderConns();
+
+        // Making connection?
+        if (this.connTo != null) {
+            let c = this._els[this.connNodeOver[0]];
+            let node = c[this.connNodeOver[1] ? "inputs" : "outputs"][this.connNodeOver[2]];
+            let start = [c.x + node.x, c.y + node.y];
+
+            noFill();
+            stroke(255, 0, 200);
+            drawCurve(start, this.connTo);
+        }
+
+        for (const id in this._els) this._els[id].render();
 
         if (this.primedDeletion) {
             background(150, 200);
@@ -53,6 +85,41 @@ class Workspace {
             fill(50, 60, 230);
             y += 35;
             text('Press Enter to delete ' + this.componentOver.name + '...', x, y);
+        } else {
+            // Info box?
+            if (this.componentOver && this.componentOverTicks > app.fps / 2) {
+                textAlign(LEFT);
+                const c = this.componentOver;
+                const info = c.getPopupText();
+
+                fill(169, 225);
+                stroke(51);
+                strokeWeight(1);
+                let x = mouseX + 10, y = mouseY;
+                let spacing = 15;
+                let w = 100, h = (info.length + 2) * spacing + spacing;
+                rect(x, y, w, h);
+
+                fill(250, 255);
+                noStroke();
+                textSize(13);
+
+                x += 5;
+                y += spacing;
+                text(c.name, x, y);
+
+                y += spacing;
+                text('State: ', x, y);
+                push();
+                fill(...app.opts['colour' + c.state]);
+                text(c.state ? "On" : "Off", x + 40, y);
+                pop();
+
+                for (let txt of info) {
+                    y += spacing;
+                    text(txt, x, y);
+                }
+            }
         }
     }
 
@@ -63,7 +130,7 @@ class Workspace {
     forEachComponent(fn) {
         for (const id in this._els) {
             if (this._els.hasOwnProperty(id)) {
-                if (fn(this._els[id], id) === false) break;
+                if (fn(this._els[id], +id) === false) break;
             }
         }
     }
@@ -105,6 +172,7 @@ class Workspace {
 
         const dst_c = this._els[dst];
         if (dst_c.inputs.length <= dst_index) throw new Error(`Connection destination (${dst_c.name}) does not have input node with index ${dst_index}`);
+        if (dst_c.inputs[dst_index].c) throw new Error(`Connection destination (${dst_c.name}) already has an input at node with index ${dst_index}`);
 
         src_c.outputs[src_index].c.push(dst_c);
         src_c.outputs[src_index].ci.push(dst_index);
@@ -202,6 +270,27 @@ class Workspace {
     }
 
     /**
+     * Create a component
+     * @param {number} type         Numeric ID of type 
+     * @param {any} data            Other data
+     * @param {number} x The x position of the component
+     * @param {number} y The y position of the component
+     * @return {Component | null} The created component (or null if type unknown)
+     */
+    static createComponent(type, data, x, y) {
+        switch (type) {
+            case 0:
+                return new Input(data, x, y);
+            case 1:
+                return new Output(data, x, y);
+            case 2:
+                return new LogicGate(LogicGate.types[data], x, y);
+            default:
+                return null;
+        }
+    }
+
+    /**
      * Create Canvas object from object data
      * - Expects input equivalent to <instance>.toObject()
      * @param {object} data - JSON data
@@ -214,24 +303,8 @@ class Workspace {
         // Logic gates
         if (data.e) {
             for (let el of data.e) {
-                let object;
-                switch (el.t) {
-                    case 0:
-                        object = new Input(el.d, el.x, el.y);
-                        break;
-                    case 1:
-                        object = new Output(el.d, el.x, el.y);
-                        break;
-                    case 2:
-                        object = new Viewer(el.x, el.y);
-                        break;
-                    case 3:
-                        object = new LogicGate(logicGateTypes[el.d], el.x, el.y);
-                        break;
-                    default:
-                        throw new Error('Unknown component type #' + el.t);
-                }
-                workspace.addComponent(object, el.id);
+                let object = Workspace.createComponent(el.t, el.d, el.x, el.y);
+                if (object) workspace.addComponent(object, el.id);
             }
         }
 

@@ -25,9 +25,10 @@ const getHTMLUnknown = () => '<span class="unknown">?</span>';
  * @param {number} y        Y coordinate of connection node
 */
 const createInputConnObj = (x, y) => ({
-    x, y,
-    c: null,
-    ci: NaN,
+    x, y, // Pos
+    c: null, // Component
+    ci: NaN, // Conn index of component
+    h: false, // Is highlighted?
 });
 
 /** Return object for output connection
@@ -35,18 +36,18 @@ const createInputConnObj = (x, y) => ({
  * @param {number} y        Y coordinate of connection node
 */
 const createOutputConnObj = (x, y) => ({
-    x, y,
-    c: [],
-    ci: [],
+    x, y, // Pos
+    c: [], // Array of connected components
+    ci: [], // Array of associated conn indexes (matches to this.c array)
+    h: false, // Is highlighted
 });
 
 /** Generate algebra table
  * @param {Workspace} ws workspace object
- * @return {HTMLTableElement} Table
+ * @return {HTMLDivElement}
  */
 function generateAlgebraTable(ws) {
-    const table = document.createElement('table');
-    table.insertAdjacentHTML('beforeend', `<tr><th>Algebraic</th><th>Substituted</th></tr>`);
+    const div = document.createElement('div');
 
     let count = 0;
     ws.forEachComponent((c) => {
@@ -60,12 +61,12 @@ function generateAlgebraTable(ws) {
 
             let state = Component.StyledAlgebra ? getHTMLState(c.state) : c.state;
 
-            table.innerHTML += `<tr><td>${c.label} = ${str}</td><td>${c.label} = ${strSub} = ${state}</td></tr>`;
+            div.insertAdjacentHTML('beforeend', `<p>${c.label} = ${str} = ${strSub} = ${state}</p>`);
         }
     });
-    if (count == 0) table.insertAdjacentHTML('beforeend', `<td colspan='5'><i>No output components</i></td>`);
+    if (count == 0) div.insertAdjacentHTML('beforeend', `<p><i>No output components</i></p>`);
 
-    return table;
+    return div;
 }
 
 /**
@@ -79,4 +80,86 @@ const hide = (element, hide) => {
     } else {
         element.removeAttribute('hidden');
     }
+};
+const isHidden = element => element.getAttribute('hidden') == 'hidden';
+
+/** 
+ * Round to nearest number
+ * @param {number} number number to round
+ * @param {number} nearest number to round nearest to
+ * @return {number} Rounded number
+*/
+const round = (number, nearest) => Math.ceil(number / nearest) * nearest;
+
+/** Get connection node from info (type same as Workspace.connNdoeOver) */
+const getConn = (workspace, tuple) => workspace.getComponent(tuple[0])[tuple[1] ? "inputs" : "outputs"][tuple[2]];
+
+/**
+ * Given a conn object, remove the connection
+ * - NB modified the object
+ * @param {object} obj connection object 
+ */
+function removeConn(obj) {
+    if (Array.isArray(obj.c)) {
+        // OUTPUT connection
+        for (let i = 0; i < obj.c.length; i++) {
+            // Remove conn object stored in output.c[i].inputs array
+            obj.c[i].inputs[obj.ci[i]].c = null;
+            obj.c[i].inputs[obj.ci[i]].ci = NaN;
+        }
+        obj.c.length = 0;
+        obj.ci.length = 0;
+    } else if (obj.c) {
+        // INPUT connection
+        // Find stored index in input component, and remove their copy of a connection object
+        let index = obj.c.outputs[obj.ci].c.indexOf(obj.c);
+        if (index != -1) {
+            obj.c.outputs[obj.ci].c.splice(index, 1);
+            obj.c.outputs[obj.ci].ci.splice(index, 1);
+        }
+
+        // Remove our version
+        obj.c = null;
+        obj.ci = NaN;
+    }
+}
+
+/** Round given coordinate (number) to an appropriate degree */
+const roundCoord = n => app.opts.gridw == 0 || isNaN(app.opts.gridw) ? Math.round(n) : round(n, app.opts.gridw);
+
+/**
+ * Create bezier curve for two coordinates
+ * @param {[number, number]} start      Start coords
+ * @param {[number, number]} end        End coords
+*/
+const drawCurve = (start, end) => {
+    let crv = app.opts.curviness;
+    bezier(...start, start[0] + crv, start[1], end[0] - crv, end[1], ...end);
+};
+
+/**
+ * What are we over right now?
+ * - Assume active workspace as app.workspace
+ * @param {number} x
+ * @param {number} y
+ * @return {null | Component | [number, boolean, number]} Nothing, component, or conn reference
+ */
+const getThingOver = (x, y) => {
+    let obj = null;
+    app.workspace.forEachComponent((c, cid) => {
+        // Is in vicinity?
+        if (c.isOver(x, y, app.opts.cnodew)) {
+            // Is over connection?
+            let conno = c.isOverConn(x, y);
+            if (conno) {
+                conno.unshift(cid);
+                obj = conno;
+                return false;
+            } else if (c.isOver(x, y)) {
+                obj = c;
+                return false;
+            }
+        }
+    });
+    return obj;
 };

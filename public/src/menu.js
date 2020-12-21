@@ -37,7 +37,10 @@ const menu = {
         alert("A file is already open");
       } else {
         if (typeof file == 'string') file = { name: file };
-        let passwd = file.protected ? window.prompt(`File ${file.name} is protected. Enter password to open.`) : null;
+        let passwd = file.protected ?
+          file.passwd == undefined ?
+            window.prompt(`File ${file.name} is protected. Enter password to open.`) : null
+          : file.passwd;
         socket.getFile.request(file.name, passwd, data => {
           app.file.open = true;
           app.file.name = data.name;
@@ -94,7 +97,18 @@ const menu = {
           app.closeWorkspace();
         }
       } else {
-        this.message('No file to close', ERROR);
+        // app.message('No file to close', ERROR);
+      }
+
+      if (app.workspace) {
+        if (app.file.name && !ignore && app.workspace.contentAltered) {
+          // Not up-to-date... Prompt to save
+          this.showPopup(true);
+        } else {
+          app.closeWorkspace();
+        }
+      } else {
+        app.message('No workspace to close', ERROR);
       }
     },
 
@@ -164,5 +178,9 @@ const menu = {
         app.message('No file to delete', ERROR);
       }
     }
+  },
+
+  toggleNav() {
+    hide(app.html.nav, !isHidden(app.html.nav));
   },
 };

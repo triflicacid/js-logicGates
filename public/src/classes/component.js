@@ -1,10 +1,9 @@
 class Component {
     constructor(x, y) {
-        /**
-         * List of inputs and outputs connected to us
-         * Array of { x, y, c: Component?, ci: number? } Where (x, y) is coordinate of connector, and component is null or the connected component. ci is the index of the connection to component
-         */
+        /** From createInputConnObj */
         this.inputs = [];
+
+        /** From createOutputConnObj */
         this.outputs = [];
 
         // These coordinates are the centre of the component
@@ -38,6 +37,27 @@ class Component {
     get name() { return this.constructor.name; }
 
     /**
+     * Render connections
+     */
+    renderConns() {
+        if (this.inputs.length != 0) {
+            strokeWeight(2);
+            stroke(51);
+            noFill();
+            let crv = app.opts.curviness;
+            for (let i = 0; i < this.inputs.length; i++) {
+                const input = this.inputs[i];
+                if (input.c) {
+                    if (app.opts.colourConns) stroke(...app.opts['colour' + this.getInputState(i)]);
+                    let end = [this.x + input.x, this.y + input.y];
+                    let start = [input.c.x + input.c.outputs[input.ci].x, input.c.y + input.c.outputs[input.ci].y];
+                    drawCurve(start, end);
+                }
+            }
+        }
+    }
+
+    /**
      * Render information
      * @param {Function} fn 
      */
@@ -53,29 +73,18 @@ class Component {
             point(this.x, this.y);
         }
 
-        // Connecions
-        if (this.outputs.length != 0) {
-            strokeWeight(2);
-            stroke(51);
-            for (const output of this.outputs) {
-                for (let i = 0; i < output.c.length; i++) {
-                    line(
-                        this.x + output.x,
-                        this.y + output.y,
-                        output.c[i].x + output.c[i].inputs[output.ci[i]].x,
-                        output.c[i].y + output.c[i].inputs[output.ci[i]].y,
-                    );
-                }
-            }
-        }
-
         push();
         translate(this.x, this.y);
 
         noStroke();
-        fill(51);
-        for (let obj of this.inputs) circle(obj.x, obj.y, Component.ConnNodeW);
-        for (let obj of this.outputs) circle(obj.x, obj.y, Component.ConnNodeW);
+        for (let obj of this.inputs) {
+            if (obj.h) fill(90, 90, 255); else fill(51);
+            circle(obj.x, obj.y, app.opts.cnodew);
+        }
+        for (let obj of this.outputs) {
+            if (obj.h) fill(90, 90, 255); else fill(51);
+            circle(obj.x, obj.y, app.opts.cnodew);
+        }
 
         if (typeof fn == 'function') {
             push();
@@ -105,9 +114,37 @@ class Component {
 
     /**
      * Are we over this component?
+     * @param {number} x X coordinate
+     * @param {number} y Y coordinate
+     * @param {number} pad  Padding around component
      */
-    isOver(x, y) {
-        return (x > this.x - this.w / 2 && x < this.x + this.w / 2 && y > this.y - this.h / 2 && y < this.y + this.h / 2);
+    isOver(x, y, pad = 0) {
+        const w = this.w / 2 + pad;
+        const h = this.h / 2 + pad;
+        // return (x > this.x - w && x < this.x + w && y > this.y - h && y < this.y + h);
+        if (x < this.x - w || x > this.x + w || y < this.y - h || y > this.y + h) return false;
+        return true;
+    }
+
+    /**
+     * Are we over a connection node?
+     * @param {number} x X coordinate
+     * @param {number} y Y coordinate
+     * @return {[boolean, number] | false} [isInput, index]
+     */
+    isOverConn(x, y) {
+        const r = app.opts.cnodew / 2;
+        for (let i = 0; i < this.inputs.length; ++i) {
+            let nx = this.x + this.inputs[i].x, ny = this.y + this.inputs[i].y;
+            if (x < nx - r || x > nx + r || y < ny - r || y > ny + r) continue;
+            return [true, i];
+        }
+        for (let i = 0; i < this.outputs.length; ++i) {
+            let nx = this.x + this.outputs[i].x, ny = this.y + this.outputs[i].y;
+            if (x < nx - r || x > nx + r || y < ny - r || y > ny + r) continue;
+            return [false, i];
+        }
+        return false;
     }
 
     /**
@@ -143,23 +180,19 @@ class Component {
 
     /**
      * Get hover info for component
-     * @return {string[][]} Lines for popup
+     * @return {string[]} Lines for popup
      */
     getPopupText() {
-        const arr = [["Type", this.name]];
-        if (Component.Debug) arr.push(["ID", this.id]);
-        arr.push(["State", Component.StyledAlgebra ? getHTMLState(this.state) : this.state]);
+        const arr = [];
+        if (Component.Debug) arr.unshift("ID " + this.id);
         return arr;
     }
 
     /** Click event */
     event_click() {
-        console.warn('Component has no click event');
+        this.isHighlighted = !this.isHighlighted;
     }
 }
 
 Component.Debug = false;
 Component.StyledAlgebra = true;
-
-/** Width of connection nodes */
-Component.ConnNodeW = 8;
