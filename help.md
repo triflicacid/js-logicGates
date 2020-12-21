@@ -1,5 +1,27 @@
 # Help
 
+## Component
+
+### Input
+
+Outputs a high (1) or a low (0) signal. Toggle this by clicking on the component.
+
+### Output
+
+Visually shows the signal it is recieving.
+
+### Logic Gate
+
+There are 7 logic gates implemented: not, and, or, xor, nor, nand, xnor (see [Here](https://en.wikipedia.org/wiki/Logic_gate) for more)
+
+These components take its inputs, executes the logic function and outputs the return state
+
+### Labels
+
+Labels are like comments; they do nothing but aid you.
+
+Click on a label and start typing, and press enter or click off the label to stop typing.
+
 ## Building Circuits
 
 ### Inserting Components

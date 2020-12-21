@@ -48,11 +48,13 @@ function draw() {
 }
 
 function mousePressed() {
-    if (app.isFrozen) return;
+    if (app.isFrozen || !isHidden(app.html.cover)) return;
 
     if (app.insertData) {
         app.stopInsert(mouseX, mouseY);
         return;
+    } else if (Label.selected) {
+        Label.selected.event_click();
     }
 
     if (!app.workspace) return;
@@ -70,7 +72,7 @@ function mousePressed() {
 }
 
 function mouseMoved() {
-    if (!app.workspace || app.isFrozen) return;
+    if (!app.workspace || app.isFrozen || !isHidden(app.html.cover)) return;
 
     if (!app.workspace.componentDragging && app.workspace.connTo == null && (mouseX != app.workspace.overCoords[0] || mouseY != app.workspace.overCoords[1])) {
         app.workspace.componentDragging = false;
@@ -97,7 +99,7 @@ function mouseMoved() {
 }
 
 function mouseDragged() {
-    if (!app.workspace || app.isFrozen) return;
+    if (!app.workspace || app.isFrozen || !isHidden(app.html.cover)) return;
 
     if (app.workspace.componentDragging) {
         if (mouseX < app.workspace.componentDragging.w / 2 || mouseX > width - app.workspace.componentDragging.w / 2
@@ -117,10 +119,13 @@ function mouseDragged() {
 }
 
 function mouseReleased() {
-    if (!app.workspace || app.isFrozen) return;
+    if (!app.workspace || app.isFrozen || !isHidden(app.html.cover)) return;
 
     if (app.workspace.componentDragging) {
-        if (!app.workspace.componentBeenMoved) app.workspace.componentOver.event_click();
+        if (!app.workspace.componentBeenMoved) {
+            app.workspace.componentOver.event_click();
+            if (app.workspace.componentOver instanceof Label) Label.selected = app.workspace.componentOver;
+        }
         app.workspace.componentDragging = false;
         app.workspace.componentBeenMoved = false;
     } else if (app.workspace.connTo) {
@@ -142,8 +147,8 @@ function mouseReleased() {
     }
 }
 
-function keyPressed() {
-    if (!app.workspace) return;
+function keyPressed(event) {
+    if (!app.workspace || !isHidden(app.html.cover)) return;
 
     if (app.workspace.primedDeletion) {
         if (key == 'Enter') {
@@ -159,7 +164,10 @@ function keyPressed() {
         app.freeze(false);
         app.workspace.primedDeletion = false;
     } else {
-        if (key == 'Delete') {
+        if (Label.selected) {
+            Label.selected.type(event);
+            return false;
+        } else if (key == 'Delete') {
             if (app.workspace.componentOver) {
                 // Delete component
                 app.freeze(true);

@@ -3,9 +3,8 @@
  * - Input 1 (on) or 0 (off)
  */
 class Input extends Component {
-    constructor(label, x, y) {
+    constructor(x, y) {
         super(x, y);
-        this.label = label;
         this.outputs[0] = createOutputConnObj(this.w / 2, 0, true);
     }
 
@@ -56,9 +55,8 @@ Input.ID = 0;
  * - Terminal component
  */
 class Output extends Component {
-    constructor(label, x, y) {
+    constructor(x, y) {
         super(x, y);
-        this.label = label;
         this.inputs[0] = createInputConnObj(-this.w / 2, 0, false);
     }
 

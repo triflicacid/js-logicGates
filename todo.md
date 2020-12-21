@@ -2,8 +2,9 @@
 
 - ~~Not-based logic gates: xnor, nor, nand~~ (20/12/2020, 21:48)
 - Add clock component
-- ~~Save Input state~~ (21/12/2020, 18:50)
+- ~~Save Input state~~ (20/12/2020, 19:56)
 - *n*-bit binary decoder
+- ~~Label component~~ (20/12/2020, 21:05)
 
 ## GUI
 
@@ -15,6 +16,8 @@
   - Change connection node width
   - Change connection 'curviness'
   - Coloured Connectors?
+  - Debug Mode?
+  - View hover info?
 - Panable canvas (infinite size)
 - Password for opening file - password-style input box
 

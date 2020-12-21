@@ -86,7 +86,7 @@ class Workspace {
             text('Press Enter to delete ' + this.componentOver.name + '...', x, y);
         } else {
             // Info box?
-            if (this.componentOver && this.componentOverTicks > app.fps / 2) {
+            if (this.componentOver && this.componentOver.showInfo && this.componentOverTicks > app.fps / 2) {
                 textAlign(LEFT);
                 const c = this.componentOver;
                 const info = c.getPopupText();
@@ -253,9 +253,9 @@ class Workspace {
         let logicGateTypes = Object.keys(LogicGate.data);
         this.forEachComponent((c) => {
             let obj = { id: c.id, t: c.constructor.ID, x: c.x, y: c.y };
-            if (typeof c.label == 'string' && c.label.length != 0) obj.l = c.label;
             if (c.constructor.name == 'LogicGate') obj.d = logicGateTypes.indexOf(c.type);
             else if (c.constructor.name == 'Input' && c.state == 1) obj.d = c.state;
+            else if (c.constructor.name == 'Label') obj.d = btoa(c._txt);
             json.e.push(obj);
 
             for (let output of c.outputs) {
@@ -265,6 +265,9 @@ class Workspace {
             }
         });
 
+        if (json.c.length == 0) delete json.c;
+        if (json.e.length == 0) delete json.e;
+
         return json;
     }
 
@@ -272,21 +275,26 @@ class Workspace {
      * Create a component
      * @param {number} type         Numeric ID of type 
      * @param {any} data            Other data
-     * @param {string} label        Component's label
      * @param {number} x The x position of the component
      * @param {number} y The y position of the component
      * @return {Component | null} The created component (or null if type unknown)
      */
-    static createComponent(type, data, label, x, y) {
+    static createComponent(type, data, x, y) {
         switch (type) {
-            case 0:
-                var c = new Input(label, x, y);
+            case Input.ID: {
+                let c = new Input(x, y);
                 c._state = data ? 1 : 0;
                 return c;
-            case 1:
-                return new Output(label, x, y);
-            case 2:
+            }
+            case Output.ID:
+                return new Output(x, y);
+            case LogicGate.ID:
                 return new LogicGate(LogicGate.types[data], x, y);
+            case Label.ID: {
+                let c = new Label(x, y);
+                if (typeof data === 'string' && data.length > 0) c.text(atob(data));
+                return c;
+            }
             default:
                 return null;
         }
@@ -304,7 +312,7 @@ class Workspace {
         // Logic gates
         if (data.e) {
             for (let el of data.e) {
-                let object = Workspace.createComponent(el.t, el.d, el.l, el.x, el.y);
+                let object = Workspace.createComponent(el.t, el.d, el.x, el.y);
                 if (object) workspace.addComponent(object, el.id);
             }
         }

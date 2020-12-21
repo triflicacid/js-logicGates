@@ -16,6 +16,10 @@ Stored under `src/lib/*`
 - `p5.js` P5.js is a library that assists with canvas graphics. View more at [https://p5js.org/](https://p5js.org/).
 - `sound.js` A quick sound library which I made in another project.
 
+## Attributions
+
+- `Label` icon: [Freepik from www.flaticon.com](https://www.flaticon.com/authors/freepik)
+
 ---
 
 Author: Ruben Saunders

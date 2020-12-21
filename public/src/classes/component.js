@@ -19,10 +19,9 @@ class Component {
          */
         this._state = 0;
 
-        this.label = ''; // Label for component
-
         this.onStateChange = undefined; // Called whenever state is changed
         this.isHighlighted = false;
+        this.showInfo = true; // Show info in hover box
     }
 
     get state() { return this._state; }
@@ -44,7 +43,6 @@ class Component {
             strokeWeight(2);
             stroke(51);
             noFill();
-            let crv = app.opts.curviness;
             for (let i = 0; i < this.inputs.length; i++) {
                 const input = this.inputs[i];
                 if (input.c) {
@@ -92,15 +90,6 @@ class Component {
             pop();
         }
 
-        // Label
-        if (typeof this.label == 'string') {
-            fill(51);
-            noStroke();
-            textSize(13);
-            textAlign(CENTER);
-            text(this.label, 0, -this.h / 1.7);
-        }
-
         pop();
 
         if (this.isHighlighted) {
@@ -121,7 +110,6 @@ class Component {
     isOver(x, y, pad = 0) {
         const w = this.w / 2 + pad;
         const h = this.h / 2 + pad;
-        // return (x > this.x - w && x < this.x + w && y > this.y - h && y < this.y + h);
         if (x < this.x - w || x > this.x + w || y < this.y - h || y > this.y + h) return false;
         return true;
     }
