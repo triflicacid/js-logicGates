@@ -19,9 +19,11 @@ const app = {
     cnodew: 9, // Node with for connectors
     curviness: 120, // Curviness to connections
     colourConns: true, // Show state in wires?
+    showBLabels: true, // Show binded labels for components
 
     colour0: [250, 30, 55],
     colour1: [74, 159, 74],
+    debug: false, // Debug mode?
   },
 
   /** File data */
@@ -38,8 +40,6 @@ const app = {
   /** HTML elements for visuals */
   html: {
     canvasContainer: document.getElementById('container'),
-    evaluateCheckbox: document.getElementById('is-executing'),
-    booleanAlgebraTable: document.getElementById('c-algebra'),
     optionsNofile: document.getElementById('options-nofile'),
     optionsFile: document.getElementById('options-file'),
     cover: document.getElementsByClassName('cover')[0],
@@ -51,7 +51,7 @@ const app = {
     _: document.getElementById('statusbar'),
     items: [["File", "none"]],
     render() {
-      this._.innerHTML = '';
+      this._.innerHTML = '<div><a target="_blank" href="help.html">Help</a></div>';
       for (let item of this.items) {
         this._.insertAdjacentHTML('beforeend', `<div>${item[0]}: ${item[1]}</div>`);
       }
@@ -90,8 +90,11 @@ const app = {
     hide(this.html.canvasContainer, true);
     hide(this.html.optionsFile, true);
     hide(this.html.cover, true);
+    hide(this.html.nav, true);
     for (let el of document.getElementsByClassName('popup')) hide(el, true);
     document.body.addEventListener('click', this.stopInsert);
+    menu.advancedOpts.init();
+    this.statusbar.render();
 
   },
 
@@ -131,7 +134,9 @@ const app = {
       hide(this.html.canvasContainer, false);
       hide(this.html.optionsNofile, true);
       hide(this.html.optionsFile, false);
+      hide(this.html.nav, false);
       for (let el of document.getElementsByClassName('current-file')) el.innerText = this.file.name;
+      menu.advancedOpts.update();
     }
   },
 
@@ -142,6 +147,7 @@ const app = {
       hide(this.html.canvasContainer, true);
       hide(this.html.optionsNofile, false);
       hide(this.html.optionsFile, true);
+      hide(this.html.nav, true);
 
       // Clear file info
       app.file.open = false;
@@ -217,12 +223,32 @@ const app = {
         let c = Workspace.createComponent(...app.insertData, x, y);
         if (c) {
           app.workspace.addComponent(c);
+          if (c instanceof LabeledComponent) c.label = c.id.toString();
           app.workspace.contentAltered = true;
         }
         app.insertData = null;
         document.body.classList.remove('dragging');
       }
     }
+  },
+
+  /** Export current opt data to array */
+  getOptData() {
+    return [this.opts.gridw, this.opts.curviness, +this.opts.colourConns, this.opts.cnodew, +this.opts.showBLabels];
+  },
+
+  /** Import opt data from array (output of this.getOptData) */
+  setOptData(array) {
+    this.opts.gridw = array[0];
+    this.opts.curviness = array[1];
+    this.opts.colourConns = !!(array[2]);
+    this.opts.cnodew = array[3];
+    this.opts.showBLabels = !!(array[4]);
+  },
+
+  /** Set opt data to default */
+  defaultOptData() {
+    return [50, 120, 1, 9, 1];
   },
 };
 

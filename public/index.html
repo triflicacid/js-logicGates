@@ -26,6 +26,7 @@
             <li><a class="btn" href="javascript:void(0);" onclick="menu.saveAs.showPopup(true);">&#128393; Save As</a></li>
             <li><a class="btn" href="javascript:void(0);" onclick="menu.deleteFile.showPopup(true);">&#128465; Delete</a></li>
             <li><a class="btn" href="javascript:void(0);" onclick="menu.toggleNav();">Toggle Menu</a></li>
+            <li><a class="btn" href="javascript:void(0);" onclick="menu.advancedOpts.showPopup(true);">Advanced Options</a></li>
         </ul>
     </div>
 
@@ -39,6 +40,7 @@
 
             <span>Logic Gates</span>
             <div>
+                <div onclick="app.startInsert(2, 0);"><img src="img/buffer.png" /><br><span>Buffer</span></div>
                 <div onclick="app.startInsert(2, 1);"><img src="img/not.png" /><br><span>Not</span></div>
                 <div onclick="app.startInsert(2, 2);"><img src="img/and.png" /><br><span>And</span></div>
                 <div onclick="app.startInsert(2, 3);"><img src="img/or.png" /><br><span>Or</span></div>
@@ -56,16 +58,7 @@
         <div id="container"></div>
     </div>
 
-    <div id="c-algebra"></div>
-
-    <div id="statusbar" class="striped">
-        <div>
-            File: <span id='statusbar-file'></span>
-        </div>
-        <div>
-            Up-to-date: <span id='statusbar-uptodate'></span>
-        </div>
-    </div>
+    <div id="statusbar" class="striped"></div>
 
     <!-- ================= POPUPS ================= -->
     <div class="popup" id="popup-open-file">
@@ -111,6 +104,34 @@
         <br>
         <a class="btn" href="javascript:void(0);" onclick="menu.deleteFile.delete();">Delete</a>
         <a class="btn" href="javascript:void(0);" onclick="menu.deleteFile.showPopup(false);">Cancel</a>
+    </div>
+    <div class="popup centre" id="popup-adv-opts">
+        <h2>Advanced Options</h2>
+        <table>
+            <tr>
+                <th>Grid Size</th>
+                <td><input type="range" min="0" max="250" step="5" id="ao-grid-size" />  <span id="ao-grid-size-val"></span></td>
+            </tr>
+            <tr>
+                <th>Wire Curve</th>
+                <td><input type="range" min="0" max="150" step="2" id="ao-curviness" />  <span id="ao-curviness-val"></span></td>
+            </tr>
+            <tr>
+                <th>Coloured Wires</th>
+                <td><input type="checkbox" id="ao-coloured-wires" /></span></td>
+            </tr>
+            <tr>
+                <th><abbr title="Width of connection nodes (black circles)">Node Width</abbr></th>
+                <td><input type="range" min="5" max="15" step="1" id="ao-cnodew" />  <span id="ao-cnodew-val"></span></td>
+            </tr>
+            <tr>
+                <th><abbr title="Display bound labels (immovable labels which follow components?)">Bound Labels</abbr></th>
+                <td><input type="checkbox" id="ao-blabels" /></span></td>
+            </tr>
+        </table>
+        <br>
+        <a class="btn" href="javascript:void(0);" onclick="menu.advancedOpts.reset();">Reset</a>
+        <a class="btn" href="javascript:void(0);" onclick="menu.advancedOpts.showPopup(false);">Close</a>
     </div>
 
     <!--

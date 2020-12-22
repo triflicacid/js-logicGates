@@ -137,13 +137,14 @@ div#nav>span {
 
 div#nav>div {
     display: flex;
+    flex-wrap: wrap;
     flex-direction: row;
     justify-content: start;
     align-items: center;
     align-content: space-around;
     border-bottom: 1px solid gray;
-    margin-bottom: 5px;
-    flex-wrap: wrap;
+    margin: 5px 0 0 2%;
+    margin-bottom: 6px;
 }
 
 div#nav>div>div {

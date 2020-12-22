@@ -86,7 +86,7 @@ class Workspace {
             text('Press Enter to delete ' + this.componentOver.name + '...', x, y);
         } else {
             // Info box?
-            if (this.componentOver && this.componentOver.showInfo && this.componentOverTicks > app.fps / 2) {
+            if (this.componentOver && this.componentOver.constructor.name != 'Label' && this.componentOverTicks > app.fps / 2) {
                 textAlign(LEFT);
                 const c = this.componentOver;
                 const info = c.getPopupText();
@@ -142,10 +142,13 @@ class Workspace {
      */
     addComponent(component, id = undefined) {
         component.onStateChange = () => this.stateChanged = true;
-        if (id == undefined) while (this._els[this._nextCID]) this._nextCID++;
-        id = this._nextCID++;
+        if (id == undefined) {
+            while (this._els[this._nextCID]) this._nextCID++;
+            id = this._nextCID++;
+        }
         this._els[id] = component;
         component.id = id;
+        if (component instanceof LabeledComponent) this.addComponent(component._labelObj);
         return id;
     }
 
@@ -244,19 +247,19 @@ class Workspace {
     toObject() {
         const json = {};
 
+        // Option data
+        json.o = app.getOptData();
+
         // Array of components ('elements')
         json.e = [];
 
         // Array of connections
         json.c = [];
 
-        let logicGateTypes = Object.keys(LogicGate.data);
         this.forEachComponent((c) => {
-            let obj = { id: c.id, t: c.constructor.ID, x: c.x, y: c.y };
-            if (c.constructor.name == 'LogicGate') obj.d = logicGateTypes.indexOf(c.type);
-            else if (c.constructor.name == 'Input' && c.state == 1) obj.d = c.state;
-            else if (c.constructor.name == 'Label') obj.d = btoa(c._txt);
-            json.e.push(obj);
+            let data = c.toObject();
+            if (data == null) return;
+            json.e.push(data);
 
             for (let output of c.outputs) {
                 for (let i = 0; i < output.c.length; i++) {
@@ -313,6 +316,7 @@ class Workspace {
         if (data.e) {
             for (let el of data.e) {
                 let object = Workspace.createComponent(el.t, el.d, el.x, el.y);
+                if (el.l) object.label = el.l;
                 if (object) workspace.addComponent(object, el.id);
             }
         }
@@ -320,8 +324,18 @@ class Workspace {
         // connections
         if (data.c) {
             for (let conn of data.c) {
-                workspace.connectComponents(...conn);
+                try {
+                    workspace.connectComponents(...conn);
+                } catch (e) {
+                    console.error(e);
+                    app.message(`File Read Error.\nError with connection [${conn}]:\n${e.message}`);
+                }
             }
+        }
+
+        // Opt data
+        if (data.o) {
+            app.setOptData(data.o);
         }
 
         return workspace;

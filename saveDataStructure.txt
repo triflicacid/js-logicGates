@@ -12,4 +12,7 @@
     // Array of connections
     // connection format: [src, src_index, dst, dst_index]
     "c"
+
+    // "Advanced Option" data
+    "o"
 }

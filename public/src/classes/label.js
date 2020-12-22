@@ -5,25 +5,31 @@ class Label extends Component {
     this._txt = '';
     this.typing = false;
     this._flash = false;
-    this.showInfo = false;
+    this._frames = 0;
+    this.linkedc = null; // Component we are linked to
   }
 
   /**
    * Set text content of this
+   * @param {boolean} sudo  SUDO render if linkedc?
    * @param {string} txt  Text content
    */
   text(txt) { this._txt = txt; }
 
-  render() {
+  render(sudo = false) {
+    this._frames++;
+
+    if (!sudo && this.linkedc) return;
+
     super.render(() => {
       textAlign(CENTER, CENTER);
       noStroke();
       fill(51);
       textSize(15);
       let p = 7;
-      let w = textWidth(this._txt) + 2 * p;
-      let h = 25;
-      rect(-w / 2, -h / 2, w, h);
+      this.w = (typeof this._txt != 'string' || this._txt.length == 0 ? 0 : textWidth(this._txt)) + 2 * p;
+      this.h = 25;
+      rect(-this.w / 2, -this.h / 2, this.w, this.h);
       fill(250);
       text(this._txt, 0, 0);
 
@@ -31,13 +37,19 @@ class Label extends Component {
         if (this._flash) {
           stroke(255);
           strokeWeight(2);
-          let x = w / 2 - p / 2;
-          let mh = h / 3;
-          line(x, -mh, x, mh);
+          let x = this.w / 2 - p / 2;
+          let h = this.h / 3;
+          line(x, -h, x, h);
 
-          if (frameCount % 30 == 0) this._flash = false;
+          if (this._frames >= 30) {
+            this._flash = false;
+            this._frames = 0;
+          }
         } else {
-          if (frameCount % 15 == 0) this._flash = true;
+          if (this._frames >= 10) {
+            this._flash = true;
+            this._frames = 0;
+          }
         }
       }
     });
@@ -53,7 +65,6 @@ class Label extends Component {
     } else if (event.key.length == 1) {
       this._txt += event.key;
     } else {
-      console.log(event.key, event.keyCode)
       Sounds.play("error");
     }
   }
@@ -61,6 +72,17 @@ class Label extends Component {
   event_click() {
     this.typing = !this.typing;
     Label.selected = this.typing ? this : null;
+
+    if (!this.typing && this.linkedc && (typeof this._txt != 'string' || this._txt.length == 0)) this._txt = this.linkedc.id.toString();
+  }
+
+  event_delete() { return !this.linkedc; }
+
+  event_mstart() { return !this.linkedc; }
+
+  toObject() {
+    // Linked to component via LabeledComponent?
+    return this.linkedc ? null : { ...super.toObject(), d: btoa(this._txt), };
   }
 }
 

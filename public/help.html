@@ -1,0 +1,54 @@
+<h2 id="about-the-file-system">About the File System</h2>
+<p>This application uses files to store circuits. All files are visible to everyone.</p>
+<p>As such, there is an additional option to password protect your files. This will prompt any user opening the file for the password, and only continue if the password is correct.</p>
+<p><em>NB passwords are stored seperatley to the circuit</em></p>
+<h2 id="menu">Menu</h2>
+<h3 id="open">Open</h3>
+<p>This brings up a list of circuit files to open. Click on the name to open the file (if the file is password protected, a text box prompt will appear)</p>
+<h3 id="new">New</h3>
+<p>Creates a new, unnamed instance. You can later save the instance, or simply discard it.</p>
+<h3 id="close">Close</h3>
+<p>Closes the current instance.</p>
+<p>If a file is open and it is not up-to-date, you will have the option to save before closing.</p>
+<h3 id="save">Save</h3>
+<p>Saves the current instance.</p>
+<p>If a file is open, saves to the file. If not, the Save As prompt will appear</p>
+<h3 id="save-as">Save As</h3>
+<p>This asks for a file name, and (optionally) a password. A password requires that, upon opening the file, the correct password is needed to continue.</p>
+<p>Save As will create a new file with the current state of the instance, and open the created file</p>
+<h3 id="delete">Delete</h3>
+<p>This will prompt to delete the current file, or, if a file isn&#39;t open, discard the workspace.</p>
+<p>To proceed with deletion, the number sequence must be typed into the text box correctly (this is to help avoid accidental deletions, as recovery is not possible)</p>
+<h3 id="toggle-menu">Toggle Menu</h3>
+<p>This will hide/unhide the menu on the left-hand side of the canvas</p>
+<h3 id="advanced-options">Advanced Options</h3>
+<p>This will bring up several advanced options which subtly change appearence and quality of life. None of these options change the fundamental logic behind the circuit.</p>
+<h2 id="components">Components</h2>
+<h3 id="input">Input</h3>
+<p>Outputs a high (1) or a low (0) signal. Toggle this by clicking on the component.</p>
+<h3 id="output">Output</h3>
+<p>Visually shows the signal it is recieving.</p>
+<h3 id="logic-gate">Logic Gate</h3>
+<p>There are 7 logic gates implemented: not, and, or, xor, nor, nand, xnor (see <a href="https://en.wikipedia.org/wiki/Logic_gate">Here</a> for more)</p>
+<p>These components take its inputs, executes the logic function and outputs the return state</p>
+<h3 id="labels">Labels</h3>
+<p>Labels are like comments; they do nothing but aid you.</p>
+<p>Click on a label and start typing, and press enter or click off the label to stop typing.</p>
+<h4 id="bound-labels">Bound Labels</h4>
+<p>Some components (Input, Output) have a bound label. This acts as a label, but cannot be deleted nor moved, but moved with the component.</p>
+<p>The bound label acts as an identifier for the Input/Output, should the circuit be exported to an integrated circuit.</p>
+<h2 id="building-circuits">Building Circuits</h2>
+<h3 id="inserting-components">Inserting Components</h3>
+<p>Click on button <code>Toggle Menu</code> to show side menu if it is hidden</p>
+<p>Click on component to insert. Then click on the canvas to insert the component at that position.</p>
+<h3 id="moving-components">Moving Components</h3>
+<p>To move a component, simply click and drag your mouse. Its connections will redraw dynamically</p>
+<h3 id="deleting-components">Deleting Components</h3>
+<p>Hover over the component in question and press the <code>Delete</code> key (above backspace) to bring up the deletion prompt</p>
+<p>Then, press <code>Enter</code> to confirm deletion, or any other key to cancel</p>
+<h3 id="creating-connections">Creating Connections</h3>
+<p>Click and drag from an output node (black circle). A connection line will be drawn to your mouse.</p>
+<p>Drag the connection line over an input node, and drop to create connection. (if successfuly, will create a black connection line. Else, the line will disappear)</p>
+<h3 id="removing-connections">Removing Connections</h3>
+<p>To remove a connection, hover over a node which it is connected to (black circle) and press the <code>Delete</code> key (above Backspace)</p>
+<p><em>N.B. This will remove all connections from/to this node</em></p>

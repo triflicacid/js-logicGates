@@ -78,6 +78,10 @@ class LogicGate extends Component {
         }
         return "(" + str + ")";
     }
+
+    toObject() {
+        return { ...super.toObject(), d: LogicGate.types.indexOf(this._type) };
+    }
 }
 
 const initLogicGateData = () => {

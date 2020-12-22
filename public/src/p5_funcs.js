@@ -29,8 +29,8 @@ function draw() {
             app.workspace.evaluate();
             app.workspace.stateChanged = false;
 
-            app.html.booleanAlgebraTable.innerHTML = '';
-            app.html.booleanAlgebraTable.insertAdjacentElement('beforeend', generateAlgebraTable(app.workspace));
+            // app.html.booleanAlgebraTable.innerHTML = '';
+            // app.html.booleanAlgebraTable.insertAdjacentElement('beforeend', generateAlgebraTable(app.workspace));
         }
 
         if (app.workspace.componentOver && !app.workspace.componentDragging) app.workspace.componentOverTicks++;
@@ -61,8 +61,10 @@ function mousePressed() {
     app.workspace.componentOverTicks = 0;
 
     if (app.workspace.componentOver) {
-        app.workspace.componentDragging = true;
-        app.workspace.componentBeenMoved = false;
+        if (app.workspace.componentOver.event_mstart()) {
+            app.workspace.componentDragging = true;
+            app.workspace.componentBeenMoved = false;
+        }
     } else if (app.workspace.connNodeOver) {
         // Only allow creating connection from output
         if (!app.workspace.connNodeOver[1]) {
@@ -110,6 +112,7 @@ function mouseDragged() {
         app.workspace.overCoords[0] = mouseX;
         app.workspace.overCoords[1] = mouseY;
         app.workspace.contentAltered = true;
+        app.workspace.componentOver.event_drag();
     } else if (app.workspace.connTo != null) {
         const r = app.opts.cnodew / 2;
         if (mouseX < r || mouseX > width - r || mouseY < r || mouseY > height - r) return;
@@ -121,13 +124,15 @@ function mouseDragged() {
 function mouseReleased() {
     if (!app.workspace || app.isFrozen || !isHidden(app.html.cover)) return;
 
-    if (app.workspace.componentDragging) {
-        if (!app.workspace.componentBeenMoved) {
-            app.workspace.componentOver.event_click();
-            if (app.workspace.componentOver instanceof Label) Label.selected = app.workspace.componentOver;
-        }
+    // Clicked?
+    if (app.workspace.componentOver && !app.workspace.componentBeenMoved) {
+        app.workspace.componentOver.event_click();
+        if (app.workspace.componentOver instanceof Label) Label.selected = app.workspace.componentOver;
+        app.workspace.componentDragging = false;
+    } else if (app.workspace.componentDragging) {
         app.workspace.componentDragging = false;
         app.workspace.componentBeenMoved = false;
+        app.workspace.componentOver.event_mstop();
     } else if (app.workspace.connTo) {
         // Is over destination node?
         let over = getThingOver(mouseX, mouseY);
@@ -164,20 +169,22 @@ function keyPressed(event) {
         app.freeze(false);
         app.workspace.primedDeletion = false;
     } else {
-        if (Label.selected) {
-            Label.selected.type(event);
-            return false;
-        } else if (key == 'Delete') {
+        if (key == 'Delete') {
             if (app.workspace.componentOver) {
-                // Delete component
-                app.freeze(true);
-                app.workspace.primedDeletion = true;
-                app.workspace.componentOver.isHighlighted = true;
+                if (app.workspace.componentOver.event_delete()) {
+                    // Delete component
+                    app.freeze(true);
+                    app.workspace.primedDeletion = true;
+                    app.workspace.componentOver.isHighlighted = true;
+                } else Sounds.play("error");
             } else if (app.workspace.connNodeOver) {
                 // Remove all connections?
                 removeConn(app.workspace._els[app.workspace.connNodeOver[0]], app.workspace.connNodeOver[1], app.workspace.connNodeOver[2]);
                 app.workspace.contentAltered = true;
             }
+        } else if (Label.selected) {
+            Label.selected.type(event);
+            return false;
         }
     }
 }

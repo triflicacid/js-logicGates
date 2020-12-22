@@ -1,5 +1,5 @@
 function main() {
-  menu.openFile.open({ name: 'label1' });
+  // menu.openFile.open({ name: 'label1' });
   return 0;
   // app.openWorkspace();
 

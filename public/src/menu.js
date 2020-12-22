@@ -11,21 +11,21 @@ const menu = {
     },
 
     populateFileList(files) {
-      let list = document.createElement('ul'), li, a;
-      list.classList.add('invis-list');
+      let div = document.createElement('div'), span, a;
       for (let file of files) {
-        li = document.createElement('li');
-        li.insertAdjacentHTML('beforeend', '&#128462; ');
+        span = document.createElement('span');
+        span.insertAdjacentHTML('beforeend', '&#128462; ');
         a = document.createElement('a');
         a.href = 'javascript:void(0);';
         a.innerText = file.name;
         a.setAttribute('title', `${file.size} bytes ${file.protected ? '(password protected)' : ''}`);
         a.addEventListener('click', () => { this.showPopup(false); this.open(file); });
-        li.insertAdjacentElement('beforeend', a);
-        list.insertAdjacentElement('beforeend', li);
+        span.insertAdjacentElement('beforeend', a);
+        div.insertAdjacentElement('beforeend', span);
+        div.insertAdjacentHTML('beforeend', '<br>');
       }
       this.fl.innerHTML = '';
-      this.fl.insertAdjacentElement('beforeend', list);
+      this.fl.insertAdjacentElement('beforeend', div);
     },
 
     /**
@@ -191,5 +191,58 @@ const menu = {
 
   toggleNav() {
     hide(app.html.nav, !isHidden(app.html.nav));
+  },
+
+  advancedOpts: {
+    _: document.getElementById('popup-adv-opts'),
+    gridSize: document.getElementById('ao-grid-size'),
+    gridSizeVal: document.getElementById('ao-grid-size-val'),
+    curviness: document.getElementById('ao-curviness'),
+    curvinessVal: document.getElementById('ao-curviness-val'),
+    cnodew: document.getElementById('ao-cnodew'),
+    cnodewVal: document.getElementById('ao-cnodew-val'),
+    colouredWires: document.getElementById('ao-coloured-wires'),
+    blabels: document.getElementById('ao-blabels'),
+
+    init() {
+      this.gridSize.addEventListener('input', event => {
+        app.opts.gridw = +event.target.value;
+        menu.advancedOpts.gridSizeVal.innerText = event.target.value;
+      });
+      this.curviness.addEventListener('input', event => {
+        app.opts.curviness = +event.target.value;
+        menu.advancedOpts.curvinessVal.innerText = event.target.value;
+      });
+      this.cnodew.addEventListener('input', event => {
+        app.opts.cnodew = +event.target.value;
+        menu.advancedOpts.cnodewVal.innerText = event.target.value;
+      });
+      this.colouredWires.addEventListener('change', event => app.opts.colourConns = event.target.checked);
+      this.blabels.addEventListener('change', event => app.opts.showBLabels = event.target.checked);
+      this.update();
+    },
+
+    showPopup(show) {
+      hide(app.html.cover, !show);
+      hide(this._, !show);
+    },
+
+    /** Update visual elements to current opt config */
+    update() {
+      this.cnodewVal.innerText = app.opts.cnodew;
+      this.cnodew.value = app.opts.cnodew;
+      this.curvinessVal.innerText = app.opts.curviness;
+      this.curviness.value = app.opts.curviness;
+      this.gridSizeVal.innerText = app.opts.gridw;
+      this.gridSize.value = app.opts.gridw;
+      this.colouredWires.checked = app.opts.colourConns;
+      this.blabels.checked = app.opts.showBLabels;
+    },
+
+    /** Reset to original options */
+    reset() {
+      app.setOptData(app.defaultOptData());
+      this.update();
+    }
   },
 };

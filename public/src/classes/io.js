@@ -2,9 +2,9 @@
  * Input component
  * - Input 1 (on) or 0 (off)
  */
-class Input extends Component {
-    constructor(x, y) {
-        super(x, y);
+class Input extends LabeledComponent {
+    constructor(x, y, label) {
+        super(x, y, label);
         this.outputs[0] = createOutputConnObj(this.w / 2, 0, true);
     }
 
@@ -45,6 +45,12 @@ class Input extends Component {
         this.toggle();
         Sounds.play("click");
     }
+
+    toObject() {
+        let obj = super.toObject();
+        if (this.state == 1) obj.d = 1;
+        return obj;
+    }
 }
 
 Input.ID = 0;
@@ -54,9 +60,9 @@ Input.ID = 0;
  * - Shows state 0 (off) or 1 (on)
  * - Terminal component
  */
-class Output extends Component {
-    constructor(x, y) {
-        super(x, y);
+class Output extends LabeledComponent {
+    constructor(x, y, label) {
+        super(x, y, label);
         this.inputs[0] = createInputConnObj(-this.w / 2, 0, false);
     }
 

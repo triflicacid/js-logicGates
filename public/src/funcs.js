@@ -117,7 +117,6 @@ function removeConn(comp, isInput, cindex) {
         // INPUT connection
         // Find stored index in input component, and remove their copy of a connection object
         let index = obj.c.outputs[obj.ci].c.indexOf(comp);
-        console.log(index)
         if (index != -1) {
             obj.c.outputs[obj.ci].c.splice(index, 1);
             obj.c.outputs[obj.ci].ci.splice(index, 1);
@@ -127,7 +126,6 @@ function removeConn(comp, isInput, cindex) {
         obj.c = null;
         obj.ci = NaN;
     }
-    console.log(obj)
 }
 
 /** Round given coordinate (number) to an appropriate degree */

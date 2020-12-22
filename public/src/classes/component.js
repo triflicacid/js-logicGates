@@ -21,7 +21,6 @@ class Component {
 
         this.onStateChange = undefined; // Called whenever state is changed
         this.isHighlighted = false;
-        this.showInfo = true; // Show info in hover box
     }
 
     get state() { return this._state; }
@@ -60,7 +59,7 @@ class Component {
      * @param {Function} fn 
      */
     render(fn) {
-        if (Component.Debug) {
+        if (app.opts.debug) {
             // Bounding box
             noFill();
             stroke(255, 50, 240);
@@ -172,7 +171,7 @@ class Component {
      */
     getPopupText() {
         const arr = [];
-        if (Component.Debug) arr.unshift("ID " + this.id);
+        if (app.opts.debug) arr.unshift("ID " + this.id);
         return arr;
     }
 
@@ -180,7 +179,52 @@ class Component {
     event_click() {
         this.isHighlighted = !this.isHighlighted;
     }
+
+    /** Permission to delete? */
+    event_delete() { return true; }
+
+    /** Permission to START moving */
+    event_mstart() { return true; }
+
+    event_drag() { }
+
+    /** Stopped moving */
+    event_mstop() { }
+
+    /**
+     * Represent class in object form
+     * @return {object} Data
+     */
+    toObject() {
+        return { id: this.id, t: this.constructor.ID, x: this.x, y: this.y };
+    }
 }
 
-Component.Debug = false;
 Component.StyledAlgebra = true;
+
+/** A component which is tied to a label */
+class LabeledComponent extends Component {
+    constructor(x, y, label) {
+        super(x, y);
+        this._labelObj = new Label(this.x, this.y - this.h);
+        this._labelObj.linkedc = this;
+        this.label = label;
+    }
+
+    get label() { return this._labelObj._txt; }
+    set label(t) { return this._labelObj._txt = t; }
+
+    render(fn) {
+        super.render(fn);
+        if (app.opts.showBLabels) this._labelObj.render(true);
+    }
+
+    toObject() {
+        return { ...super.toObject(), l: this.label };
+    }
+
+    event_drag() {
+        this._labelObj.x = this.x;
+        this._labelObj.y = this.y - this.h;
+    }
+}
