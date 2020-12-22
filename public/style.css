@@ -159,7 +159,7 @@ div#nav img {
     height: auto;
 }
 
-body:not(.frozen) div#nav>div>div:hover {
+body:not(.frozen):not(.dragging) div#nav>div>div:hover {
     cursor: grab;
 }
 
@@ -196,4 +196,8 @@ div#statusbar>div {
     color: black;
     font-size: .85em;
     font-family: monospace;
+}
+
+textarea {
+    outline: none !important;
 }

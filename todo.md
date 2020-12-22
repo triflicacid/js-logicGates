@@ -6,6 +6,7 @@
 - ~~Save Input state~~ (20/12/2020, 19:56)
 - *n*-bit binary decoder (LCD display for 4-bit?)
 - ~~Label component~~ (20/12/2020, 21:05)
+- ~~Comment component~~ (22/12/2020, 13:58)
 
 ## GUI
 
@@ -24,4 +25,4 @@
 
 - ~~Create workspace, then save~~ (21/12/2020, 17:28)
 - Undo/Redo functionality
-- Print
+- ~~Print~~ (22/12/2020, 15:47) along with other "sharing" options

@@ -55,7 +55,7 @@ const menu = {
   /**
    * Save file app.file.name
    * @param {boolean} closeAfter  Close file after save?
-   * */
+   */
   saveFile(closeAfter) {
     if (app.workspace) {
       if (app.file.name) {
@@ -159,6 +159,7 @@ const menu = {
 
     showPopup(show) {
       if (show) {
+        if (app.opts.readonly) return readonlyMsg();
         this.num = Math.floor(Math.random() * 1e6);
         this.numShow.innerText = this.num;
       } else {
@@ -171,6 +172,7 @@ const menu = {
 
     delete() {
       if (app.workspace) {
+        if (app.opts.readonly) return readonlyMsg();
         if (app.file.name) {
           if (this.num != +this.inputNum.value) {
             this.showPopup(false);
@@ -203,6 +205,9 @@ const menu = {
     cnodewVal: document.getElementById('ao-cnodew-val'),
     colouredWires: document.getElementById('ao-coloured-wires'),
     blabels: document.getElementById('ao-blabels'),
+    cpreview: document.getElementById('ao-cpreview'),
+    cpreviewVal: document.getElementById('ao-cpreview-val'),
+    readonly: document.getElementById('ao-readonly'),
 
     init() {
       this.gridSize.addEventListener('input', event => {
@@ -219,6 +224,11 @@ const menu = {
       });
       this.colouredWires.addEventListener('change', event => app.opts.colourConns = event.target.checked);
       this.blabels.addEventListener('change', event => app.opts.showBLabels = event.target.checked);
+      this.cpreview.addEventListener('input', event => {
+        app.opts.commentPreview = +event.target.value;
+        menu.advancedOpts.cpreviewVal.innerText = event.target.value;
+      });
+      this.readonly.addEventListener('change', event => app.opts.readonly = event.target.checked);
       this.update();
     },
 
@@ -237,6 +247,9 @@ const menu = {
       this.gridSize.value = app.opts.gridw;
       this.colouredWires.checked = app.opts.colourConns;
       this.blabels.checked = app.opts.showBLabels;
+      this.cpreview.value = app.opts.commentPreview;
+      this.cpreviewVal.innerText = app.opts.commentPreview;
+      this.readonly.checked = app.opts.readonly;
     },
 
     /** Reset to original options */
@@ -244,5 +257,78 @@ const menu = {
       app.setOptData(app.defaultOptData());
       this.update();
     }
+  },
+
+  /** Popup for commentBox component */
+  commentBox: {
+    _: document.getElementById('popup-comment-box'),
+    textarea: document.getElementById('comment-box-text'),
+    obj: null,
+
+    open(box) {
+      this.obj = box;
+      hide(app.html.cover, false);
+      hide(this._, false);
+      if (app.opts.readonly) this.textarea.setAttribute('readonly', 'readonly'); else this.textarea.removeAttribute('readonly');
+      this.textarea.value = box.text;
+      this.textarea.focus();
+    },
+
+    close() {
+      hide(app.html.cover, true);
+      hide(this._, true);
+      if (this.obj && !app.opts.readonly) {
+        if (this.obj.text != this.textarea.value) app.workspace.contentAltered = true;
+        this.obj.text = this.textarea.value;
+        this.obj = null;
+      }
+      this.textarea.value = '';
+    },
+  },
+
+  /** Download canvas as image */
+  downloadImage() {
+    let image = app.p5canvas.elt.toDataURL("image/png").replace("image/png", "image/octet-stream");
+    // window.open(image);
+    window.location.href = image;
+  },
+
+  share: {
+    _: document.getElementById('popup-share'),
+    fileLink: document.getElementById('download-file-a'),
+
+    showPopup(show) {
+      hide(app.html.cover, !show);
+      hide(this._, !show);
+    },
+
+    /** Download as image */
+    image() {
+      let image = app.p5canvas.elt.toDataURL("image/png").replace("image/png", "image/octet-stream");
+      window.open(image);
+      this.showPopup(false);
+    },
+
+    file() {
+      let text = JSON.stringify(app.workspace.toObject());
+      let data = new Blob([btoa(text)], { type: 'text/plain' });
+      let url = window.URL.createObjectURL(data);
+      this.fileLink.href = url;
+      this.fileLink.click();
+      this.showPopup(false);
+    },
+
+    print() {
+      this.showPopup(false);
+      this.print_setup(true);
+      window.print();
+      this.print_setup(false);
+    },
+
+    print_setup(hideStuff) {
+      hide(app.html.nav, hideStuff);
+      hide(app.statusbar._, hideStuff);
+      hide(app.html.menuBar, hideStuff);
+    },
   },
 };

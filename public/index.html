@@ -25,8 +25,8 @@
             <li><a class="btn" href="javascript:void(0);" onclick="menu.saveFile();">&#128427; Save</a></li>
             <li><a class="btn" href="javascript:void(0);" onclick="menu.saveAs.showPopup(true);">&#128393; Save As</a></li>
             <li><a class="btn" href="javascript:void(0);" onclick="menu.deleteFile.showPopup(true);">&#128465; Delete</a></li>
-            <li><a class="btn" href="javascript:void(0);" onclick="menu.toggleNav();">Toggle Menu</a></li>
             <li><a class="btn" href="javascript:void(0);" onclick="menu.advancedOpts.showPopup(true);">Advanced Options</a></li>
+            <li><a class="btn" href="javascript:void(0);" onclick="menu.share.showPopup(true);">&#129309; Share</a></li>
         </ul>
     </div>
 
@@ -53,6 +53,7 @@
             <span>Utility</span>
             <div>
                 <div onclick="app.startInsert(3);"><img src="img/label.png" /><br><span>Label</span></div>
+                <div onclick="app.startInsert(4);"><img src="img/comment.png" /><br><span>Comment</span></div>
             </div>
         </div>
         <div id="container"></div>
@@ -128,10 +129,31 @@
                 <th><abbr title="Display bound labels (immovable labels which follow components?)">Bound Labels</abbr></th>
                 <td><input type="checkbox" id="ao-blabels" /></span></td>
             </tr>
+            <tr>
+                <th><abbr title="How long should preview text of a comment be?">Comments</abbr></th>
+                <td><input type="range" min="10" max="70" step="1" id="ao-cpreview" />  <span id="ao-cpreview-val"></span></td>
+            </tr>
+            <tr>
+                <th><abbr title="Block use from editing the file?">Readonly</abbr></th>
+                <td><input type="checkbox" id="ao-readonly" /></span></td>
+            </tr>
         </table>
         <br>
         <a class="btn" href="javascript:void(0);" onclick="menu.advancedOpts.reset();">Reset</a>
         <a class="btn" href="javascript:void(0);" onclick="menu.advancedOpts.showPopup(false);">Close</a>
+    </div>
+    <div class="popup centre" id="popup-comment-box">
+        <textarea id="comment-box-text" rows="20" cols="80"></textarea>
+        <br><br>
+        <a class="btn" href="javascript:void(0);" onclick="menu.commentBox.close();">Close</a>
+    </div>
+    <div class="popup centre" id="popup-share">
+        <h2>Download Methods</h2>
+        <a href="javascript:void(0);" onclick="menu.share.image();" title="download.png">Download as Image</a><br>
+        <a href="javascript:void(0);" onclick="menu.share.file();" title="download.lgc">Downloas as File</a><a hidden="hidden" id='download-file-a' download="download.lgc"></a><br>
+        <a href="javascript:void(0);" onclick="menu.share.print();">Print</a><br>
+        <br>
+        <a class="btn" href="javascript:void(0);" onclick="menu.download.showPopup(false);">Close</a>
     </div>
 
     <!--
@@ -149,6 +171,7 @@
     <script type="text/javascript" charset="utf-8" src="./src/classes/io.js"></script>
     <script type="text/javascript" charset="utf-8" src="./src/classes/logic_gate.js"></script>
     <script type="text/javascript" charset="utf-8" src="./src/classes/label.js"></script>
+    <script type="text/javascript" charset="utf-8" src="./src/classes/comment-box.js"></script>
     
     <script type="text/javascript" charset="utf-8" src="./src/socket.js"></script>
     <script type="text/javascript" charset="utf-8" src="./src/menu.js"></script>

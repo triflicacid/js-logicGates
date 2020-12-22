@@ -18,10 +18,10 @@ Stored under `src/lib/*`
 
 ## Attributions
 
-- `Label` icon: [Freepik from www.flaticon.com](https://www.flaticon.com/authors/freepik)
+- `Label`, `Comment` icons made by [Freepik from www.flaticon.com](https://www.flaticon.com/authors/freepik)
 
 ---
 
-Author: Ruben Saunders
-Created: 18/12/2020, 17:16
+Author: Ruben Saunders\
+Created: 18/12/2020, 17:16\
 Status: In Development

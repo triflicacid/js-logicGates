@@ -53,6 +53,7 @@ class Input extends LabeledComponent {
     }
 }
 
+Input.hoverInfo = true;
 Input.ID = 0;
 
 /**
@@ -100,4 +101,5 @@ class Output extends LabeledComponent {
     }
 }
 
+Output.hoverInfo = true;
 Output.ID = 1;

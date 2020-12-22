@@ -61,13 +61,13 @@ function mousePressed() {
     app.workspace.componentOverTicks = 0;
 
     if (app.workspace.componentOver) {
-        if (app.workspace.componentOver.event_mstart()) {
+        if (!app.opts.readonly && app.workspace.componentOver.event_mstart()) {
             app.workspace.componentDragging = true;
             app.workspace.componentBeenMoved = false;
         }
     } else if (app.workspace.connNodeOver) {
         // Only allow creating connection from output
-        if (!app.workspace.connNodeOver[1]) {
+        if (!app.opts.readonly && !app.workspace.connNodeOver[1]) {
             app.workspace.connTo = [NaN, NaN];
         }
     }
@@ -101,7 +101,7 @@ function mouseMoved() {
 }
 
 function mouseDragged() {
-    if (!app.workspace || app.isFrozen || !isHidden(app.html.cover)) return;
+    if (!app.workspace || app.isFrozen || app.opts.readonly || !isHidden(app.html.cover)) return;
 
     if (app.workspace.componentDragging) {
         if (mouseX < app.workspace.componentDragging.w / 2 || mouseX > width - app.workspace.componentDragging.w / 2
@@ -153,38 +153,24 @@ function mouseReleased() {
 }
 
 function keyPressed(event) {
-    if (!app.workspace || !isHidden(app.html.cover)) return;
+    if (!app.workspace || app.opts.readonly || !isHidden(app.html.cover)) return;
 
-    if (app.workspace.primedDeletion) {
-        if (key == 'Enter') {
-            // Delete Component
-            app.workspace.removeComponent(app.workspace.componentOver);
-            app.workspace.stateChanged = true;
-            app.workspace.contentAltered = true;
-            app.workspace.componentOver = false;
-            Sounds.play('error');
-        } else {
-            app.workspace.componentOver.isHighlighted = false;
-        }
-        app.freeze(false);
-        app.workspace.primedDeletion = false;
-    } else {
-        if (key == 'Delete') {
-            if (app.workspace.componentOver) {
-                if (app.workspace.componentOver.event_delete()) {
-                    // Delete component
-                    app.freeze(true);
-                    app.workspace.primedDeletion = true;
-                    app.workspace.componentOver.isHighlighted = true;
-                } else Sounds.play("error");
-            } else if (app.workspace.connNodeOver) {
-                // Remove all connections?
-                removeConn(app.workspace._els[app.workspace.connNodeOver[0]], app.workspace.connNodeOver[1], app.workspace.connNodeOver[2]);
+    if (key == 'Delete') {
+        if (app.workspace.componentOver) {
+            if (app.workspace.componentOver.event_delete() && confirm(`Delete ${app.workspace.componentOver.name}?`)) {
+                app.workspace.removeComponent(app.workspace.componentOver);
+                app.workspace.stateChanged = true;
                 app.workspace.contentAltered = true;
+                app.workspace.componentOver = false;
             }
-        } else if (Label.selected) {
-            Label.selected.type(event);
-            return false;
+        } else if (app.workspace.connNodeOver) {
+            // Remove all connections?
+            removeConn(app.workspace._els[app.workspace.connNodeOver[0]], app.workspace.connNodeOver[1], app.workspace.connNodeOver[2]);
+            app.workspace.contentAltered = true;
         }
+    } else if (Label.selected) {
+        Label.selected.type(event);
+        app.workspace.contentAltered = true;
+        return false;
     }
 }

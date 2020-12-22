@@ -167,3 +167,5 @@ const getThingOver = (x, y) => {
     });
     return obj;
 };
+
+const readonlyMsg = () => app.message('Read Only: action is blocked', ERROR);

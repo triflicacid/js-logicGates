@@ -16,7 +16,6 @@ This brings up a list of circuit files to open. Click on the name to open the fi
 
 Creates a new, unnamed instance. You can later save the instance, or simply discard it.
 
-
 ### Close
 
 Closes the current instance.
@@ -41,13 +40,15 @@ This will prompt to delete the current file, or, if a file isn't open, discard t
 
 To proceed with deletion, the number sequence must be typed into the text box correctly (this is to help avoid accidental deletions, as recovery is not possible)
 
-### Toggle Menu
-
-This will hide/unhide the menu on the left-hand side of the canvas
-
 ### Advanced Options
 
 This will bring up several advanced options which subtly change appearence and quality of life. None of these options change the fundamental logic behind the circuit.
+
+### Download
+
+Downloads current canvas as PNG image.
+
+*NB the download will have no file extension. When saved, append `.png` to the end of the name*
 
 ## Components
 
@@ -76,6 +77,11 @@ Click on a label and start typing, and press enter or click off the label to sto
 Some components (Input, Output) have a bound label. This acts as a label, but cannot be deleted nor moved, but moved with the component.
 
 The bound label acts as an identifier for the Input/Output, should the circuit be exported to an integrated circuit.
+
+### Comment
+
+The comment is able to hold an arbitrary length of text.
+To view/edit the comment, click on the component to view a textarea.
 
 ## Building Circuits
 

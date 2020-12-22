@@ -93,3 +93,4 @@ class Label extends Component {
 Label.selected = null;
 
 Label.ID = 3;
+Label.hoverInfo = false;

@@ -21,9 +21,6 @@ class Workspace {
         /** Has this.componentDragging been moved? */
         this.componentBeenMoved = false;
 
-        /** Primed deletion of component? */
-        this.primedDeletion = false;
-
         /** Register: has there been a change in anything? (e.g. state change) ? */
         this.stateChanged = true;
 
@@ -69,33 +66,35 @@ class Workspace {
 
         for (const id in this._els) this._els[id].render();
 
-        if (this.primedDeletion) {
-            background(150, 200);
-            textAlign(CENTER);
-            noStroke();
+        // "Title" box over component...
+        if (this.componentOver && this.componentOver.constructor.hoverInfo && this.componentOverTicks > app.fps / 2) {
+            textAlign(LEFT);
+            const c = this.componentOver;
 
-            textSize(24);
-            fill(250, 60, 77);
-            let y = height / 2;
-            let x = width / 2;
-            text('Delete Component', x, y);
+            fill(169, 225);
+            stroke(51);
+            strokeWeight(1);
+            let x = mouseX + 10, y = mouseY;
+            let spacing = 15;
 
-            textSize(16);
-            fill(50, 60, 230);
-            y += 35;
-            text('Press Enter to delete ' + this.componentOver.name + '...', x, y);
-        } else {
-            // Info box?
-            if (this.componentOver && this.componentOver.constructor.name != 'Label' && this.componentOverTicks > app.fps / 2) {
-                textAlign(LEFT);
-                const c = this.componentOver;
+            if (c instanceof CommentBox) {
+                textAlign(LEFT, CENTER);
+
+                let txt = c.text.substr(0, app.opts.commentPreview);
+                if (txt.length < c.text.length) txt += '...';
+
+                let p = 5;
+                let h = 20, w = textWidth(txt) + p * 2;
+                rect(x, y, w, h);
+
+                fill(250, 255);
+                noStroke();
+                textSize(13);
+
+                text(txt, x + p, y + h / 2);
+            } else {
                 const info = c.getPopupText();
 
-                fill(169, 225);
-                stroke(51);
-                strokeWeight(1);
-                let x = mouseX + 10, y = mouseY;
-                let spacing = 15;
                 let w = 100, h = (info.length + 2) * spacing + spacing;
                 rect(x, y, w, h);
 
@@ -105,6 +104,7 @@ class Workspace {
 
                 x += 5;
                 y += spacing;
+
                 text(c.name, x, y);
 
                 y += spacing;
@@ -286,7 +286,7 @@ class Workspace {
         switch (type) {
             case Input.ID: {
                 let c = new Input(x, y);
-                c._state = data ? 1 : 0;
+                c.state = data;
                 return c;
             }
             case Output.ID:
@@ -296,6 +296,11 @@ class Workspace {
             case Label.ID: {
                 let c = new Label(x, y);
                 if (typeof data === 'string' && data.length > 0) c.text(atob(data));
+                return c;
+            }
+            case CommentBox.ID: {
+                let c = new CommentBox(x, y);
+                if (typeof data == 'string') c.text = atob(data);
                 return c;
             }
             default:

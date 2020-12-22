@@ -106,4 +106,5 @@ const initLogicGateData = () => {
     }
 };
 
+LogicGate.hoverInfo = true;
 LogicGate.ID = 2;

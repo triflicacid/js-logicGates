@@ -20,6 +20,8 @@ const app = {
     curviness: 120, // Curviness to connections
     colourConns: true, // Show state in wires?
     showBLabels: true, // Show binded labels for components
+    commentPreview: 25, // Number of characters to view in comment preview
+    readonly: false,
 
     colour0: [250, 30, 55],
     colour1: [74, 159, 74],
@@ -39,6 +41,7 @@ const app = {
 
   /** HTML elements for visuals */
   html: {
+    menuBar: document.getElementsByClassName('menu-bar')[0],
     canvasContainer: document.getElementById('container'),
     optionsNofile: document.getElementById('options-nofile'),
     optionsFile: document.getElementById('options-file'),
@@ -46,12 +49,25 @@ const app = {
     nav: document.getElementById('nav'),
   },
 
+  init() {
+    socket.init();
+    CommentBox.img = loadImage('./img/comment.png');
+    hide(this.html.canvasContainer, true);
+    hide(this.html.optionsFile, true);
+    hide(this.html.cover, true);
+    hide(this.html.nav, true);
+    for (let el of document.getElementsByClassName('popup')) hide(el, true);
+    document.body.addEventListener('click', this.stopInsert);
+    menu.advancedOpts.init();
+    this.statusbar.render();
+  },
+
   /** Status bar things */
   statusbar: {
     _: document.getElementById('statusbar'),
     items: [["File", "none"]],
     render() {
-      this._.innerHTML = '<div><a target="_blank" href="help.html">Help</a></div>';
+      this._.innerHTML = '<div><a target="_blank" href="https://github.com/ruben4447/js-logicGates/blob/main/help.md">Help</a></div>';
       for (let item of this.items) {
         this._.insertAdjacentHTML('beforeend', `<div>${item[0]}: ${item[1]}</div>`);
       }
@@ -83,19 +99,6 @@ const app = {
       this.items.push([item, value]);
       this.render();
     },
-  },
-
-  init() {
-    socket.init();
-    hide(this.html.canvasContainer, true);
-    hide(this.html.optionsFile, true);
-    hide(this.html.cover, true);
-    hide(this.html.nav, true);
-    for (let el of document.getElementsByClassName('popup')) hide(el, true);
-    document.body.addEventListener('click', this.stopInsert);
-    menu.advancedOpts.init();
-    this.statusbar.render();
-
   },
 
   /**
@@ -148,6 +151,7 @@ const app = {
       hide(this.html.optionsNofile, false);
       hide(this.html.optionsFile, true);
       hide(this.html.nav, true);
+      this.setOptData(this.defaultOptData());
 
       // Clear file info
       app.file.open = false;
@@ -173,7 +177,7 @@ const app = {
         break;
       case 2:
         Sounds.get("error").play(); // THis ensures the sound cannot be stacked
-        console.error('⚠ [ERROR] ' + msg);
+        console.error('[ERROR] ' + msg);
         alert(`⚠ Error ⚠\n${msg}`);
         break;
       default:
@@ -206,6 +210,7 @@ const app = {
    */
   startInsert(type, data) {
     if (this.isFrozen) return;
+    if (app.opts.readonly) return readonlyMsg();
     this.insertData = [type, data];
     document.body.classList.add('dragging');
   },
@@ -220,6 +225,7 @@ const app = {
   stopInsert(x, y) {
     if (app.insertData && app.workspace) {
       if (x > 0 && x < width && y > 0 && y < height) {
+        if (app.opts.readonly) return readonlyMsg();
         let c = Workspace.createComponent(...app.insertData, x, y);
         if (c) {
           app.workspace.addComponent(c);
@@ -234,7 +240,7 @@ const app = {
 
   /** Export current opt data to array */
   getOptData() {
-    return [this.opts.gridw, this.opts.curviness, +this.opts.colourConns, this.opts.cnodew, +this.opts.showBLabels];
+    return [this.opts.gridw, this.opts.curviness, +this.opts.colourConns, this.opts.cnodew, +this.opts.showBLabels, this.opts.commentPreview, +this.opts.readonly];
   },
 
   /** Import opt data from array (output of this.getOptData) */
@@ -244,11 +250,13 @@ const app = {
     this.opts.colourConns = !!(array[2]);
     this.opts.cnodew = array[3];
     this.opts.showBLabels = !!(array[4]);
+    this.opts.commentPreview = array[5];
+    this.opts.readonly = !!(array[6]);
   },
 
   /** Set opt data to default */
   defaultOptData() {
-    return [50, 120, 1, 9, 1];
+    return [50, 120, 1, 9, 1, 25, 0];
   },
 };
 
