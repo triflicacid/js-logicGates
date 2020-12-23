@@ -11,11 +11,11 @@ class Label extends Component {
 
   /**
    * Set text content of this
-   * @param {boolean} sudo  SUDO render if linkedc?
    * @param {string} txt  Text content
    */
   text(txt) { this._txt = txt; }
 
+  /** @param {boolean} sudo  SUDO render if linkedc? */
   render(sudo = false) {
     this._frames++;
 
@@ -62,7 +62,7 @@ class Label extends Component {
     } else if (event.keyCode == 16) { } else if (event.keyCode == 8) {
       // Backspace
       this._txt = this._txt.substr(0, this._txt.length - 1)
-    } else if (event.key.length == 1) {
+    } else if (event.key.length == 1 && this._txt.length < Label.max) {
       this._txt += event.key;
     } else {
       Sounds.play("error");
@@ -84,6 +84,10 @@ class Label extends Component {
     // Linked to component via LabeledComponent?
     return this.linkedc ? null : { ...super.toObject(), d: btoa(this._txt), };
   }
+
+  backtrace(subin) {
+    return this.linkedc ? this.linkedc.backtrace(subin) : 'null';
+  }
 }
 
 /**
@@ -94,3 +98,4 @@ Label.selected = null;
 
 Label.ID = 3;
 Label.hoverInfo = false;
+Label.max = 15;

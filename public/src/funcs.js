@@ -15,7 +15,7 @@ const getComponentInfo = component => {
  * @param {0 | 1} state
  * @return {string} HTML span element
  */
-const getHTMLState = state => `<span class='status-${state ? 'on' : 'off'}'>${state}</span>`;
+const getHTMLState = state => `<span class='status-${state ? 'on' : 'off'}'>${+state}</span>`;
 
 /** Get HTML string for unknown */
 const getHTMLUnknown = () => '<span class="unknown">?</span>';
@@ -168,4 +168,19 @@ const getThingOver = (x, y) => {
     return obj;
 };
 
-const readonlyMsg = () => app.message('Read Only: action is blocked', ERROR);
+const readonlyMsg = () => app.message('This action is blocked as the file is in read-only mode', ERROR, "Action Blocked");
+
+/**
+ * Generate every boolean combination for n inputs
+ * @param {number} n - Number of inputs
+ * @return {boolean[]][]} Array of boolean arrays of combinations
+*/
+const getCombos = n => {
+    const combos = [];
+    for (let i = 0; i < (1 << n); i++) {
+        let arr = [];
+        for (let j = n - 1; j >= 0; j--) arr.push(!!(i & (1 << j)));
+        combos.push(arr);
+    }
+    return combos;
+};

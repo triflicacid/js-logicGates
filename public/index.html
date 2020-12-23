@@ -16,18 +16,25 @@
 <body>
     <div class="cover"></div>
     <div class="menu-bar">
-        <ul class="inline" id="options-nofile">
-            <li><a class="btn" href="javascript:void(0);" onclick="menu.openFile.showPopup(true);">&#128449; Open</a></li>
-            <li><a class="btn" href="javascript:void(0);" onclick="app.openWorkspace();">&#65291; New</a></li>
-        </ul>
-        <ul class="inline" id="options-file">
-            <li><a class="btn" href="javascript:void(0);" onclick="menu.exitFile.exit();">&#9587; Close</a></li>
-            <li><a class="btn" href="javascript:void(0);" onclick="menu.saveFile();">&#128427; Save</a></li>
-            <li><a class="btn" href="javascript:void(0);" onclick="menu.saveAs.showPopup(true);">&#128393; Save As</a></li>
-            <li><a class="btn" href="javascript:void(0);" onclick="menu.deleteFile.showPopup(true);">&#128465; Delete</a></li>
-            <li><a class="btn" href="javascript:void(0);" onclick="menu.advancedOpts.showPopup(true);">Advanced Options</a></li>
-            <li><a class="btn" href="javascript:void(0);" onclick="menu.share.showPopup(true);">&#129309; Share</a></li>
-        </ul>
+        <div id="options-nofile">
+            <a class="btn" href="javascript:void(0);" onclick="menu.openFile.showPopup(true);" title="Open File">&#128449; Open</a>
+            <a class="btn" href="javascript:void(0);" onclick="app.openWorkspace();" title="Create New Workspace">&#65291; New</a>
+            <a class="btn" href="javascript:void(0);" onclick="menu.uploadFile.showPopup(true);" title="Upload Circuit File">&#9650; Upload</a>
+        </div>
+
+        <div id="options-file">
+            <a class="btn" href="javascript:void(0);" onclick="menu.exitFile.exit();" title="Close Current Workspace">&#9587;</a>
+            <a class="btn" href="javascript:void(0);" onclick="menu.saveFile();" title="Save Current Workspace">&#128427;</a>
+            <a class="btn" href="javascript:void(0);" onclick="menu.saveAs.showPopup(true);" title="Save Current Workspace As">&#128393;</a>
+            <a class="btn" href="javascript:void(0);" onclick="menu.deleteFile.showPopup(true);" title="Delete Current Workspace/File">&#128465;</a>
+            <a class="btn" href="javascript:void(0);" onclick="menu.share.showPopup(true);" title="Share Workspace"><img src="img/share.png" /></a>
+            <a class="btn" href="javascript:void(0);" onclick="menu.advancedOpts.showPopup(true);" title="Advanced Options">&#9881;</a>
+            
+            <a class="btn" href="javascript:void(0);" onclick="app.history.undoBtn();" title="Undo">&#8634;</a>
+            <a class="btn" href="javascript:void(0);" onclick="app.history.redoBtn();" title="Redo">&#8635;</a>
+            <a class="btn" href="javascript:void(0);" onclick="menu.boolAlgebra.popup(true);" title="Boolean Algebra">&#402;</a>
+            <a class="btn" href="javascript:void(0);" onclick="menu.traceTable.popup(true);" title="Trace Table"><img src="img/table.png" /></a>
+        </div>
     </div>
 
     <div id="main" oncontextmenu="return false;">
@@ -43,10 +50,10 @@
                 <div onclick="app.startInsert(2, 0);"><img src="img/buffer.png" /><br><span>Buffer</span></div>
                 <div onclick="app.startInsert(2, 1);"><img src="img/not.png" /><br><span>Not</span></div>
                 <div onclick="app.startInsert(2, 2);"><img src="img/and.png" /><br><span>And</span></div>
-                <div onclick="app.startInsert(2, 3);"><img src="img/or.png" /><br><span>Or</span></div>
-                <div onclick="app.startInsert(2, 4);"><img src="img/xor.png" /><br><span>Xor</span></div>
-                <div onclick="app.startInsert(2, 5);"><img src="img/nor.png" /><br><span>Nor</span></div>
                 <div onclick="app.startInsert(2, 6);"><img src="img/nand.png" /><br><span>Nand</span></div>
+                <div onclick="app.startInsert(2, 3);"><img src="img/or.png" /><br><span>Or</span></div>
+                <div onclick="app.startInsert(2, 5);"><img src="img/nor.png" /><br><span>Nor</span></div>
+                <div onclick="app.startInsert(2, 4);"><img src="img/xor.png" /><br><span>Xor</span></div>
                 <div onclick="app.startInsert(2, 7);"><img src="img/xnor.png" /><br><span>Xnor</span></div>
             </div>
 
@@ -137,6 +144,10 @@
                 <th><abbr title="Block use from editing the file?">Readonly</abbr></th>
                 <td><input type="checkbox" id="ao-readonly" /></span></td>
             </tr>
+            <tr>
+                <th><abbr title="Debug Mode (show extra info)">Debug</abbr></th>
+                <td><input type="checkbox" id="ao-debug" /></span></td>
+            </tr>
         </table>
         <br>
         <a class="btn" href="javascript:void(0);" onclick="menu.advancedOpts.reset();">Reset</a>
@@ -148,12 +159,30 @@
         <a class="btn" href="javascript:void(0);" onclick="menu.commentBox.close();">Close</a>
     </div>
     <div class="popup centre" id="popup-share">
-        <h2>Download Methods</h2>
+        <h2>Sharing Methods</h2>
         <a href="javascript:void(0);" onclick="menu.share.image();" title="download.png">Download as Image</a><br>
         <a href="javascript:void(0);" onclick="menu.share.file();" title="download.lgc">Downloas as File</a><a hidden="hidden" id='download-file-a' download="download.lgc"></a><br>
         <a href="javascript:void(0);" onclick="menu.share.print();">Print</a><br>
         <br>
-        <a class="btn" href="javascript:void(0);" onclick="menu.download.showPopup(false);">Close</a>
+        <a class="btn" href="javascript:void(0);" onclick="menu.share.showPopup(false);">Close</a>
+    </div>
+    <div class="popup centre" id="popup-upload">
+        <h2>Upload File</h2>
+        <input type="file" id="upload-input" accept=".lgc" onchange="menu.uploadFile.upload();" />
+        <br><br>
+        <a class="btn" href="javascript:void(0);" onclick="menu.uploadFile.showPopup(false);">Close</a>
+    </div>
+    <div class="popup centre" id="popup-bool-algebra">
+        <h2>Boolean Algebra</h2>
+        <pre id='bool-algebra-text'></pre>
+        <br>
+        <a class="btn" href="javascript:void(0);" onclick="menu.boolAlgebra.popup(false);">Close</a>
+    </div>
+    <div class="popup centre" id="popup-trace-table">
+        <h2>Trace Table</h2>
+        <table id='trace-table' border='1'></table>
+        <br>
+        <a class="btn" href="javascript:void(0);" onclick="menu.traceTable.popup(false);">Close</a>
     </div>
 
     <!--

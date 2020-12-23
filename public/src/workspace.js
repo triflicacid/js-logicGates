@@ -146,7 +146,16 @@ class Workspace {
             while (this._els[this._nextCID]) this._nextCID++;
             id = this._nextCID++;
         }
-        this._els[id] = component;
+
+        // ID already exists?
+        if (this._els[id]) {
+            // Replace old component and relocate it
+            let old = this._els[id];
+            this._els[id] = component;
+            this.addComponent(old);
+        } else {
+            this._els[id] = component;
+        }
         component.id = id;
         if (component instanceof LabeledComponent) this.addComponent(component._labelObj);
         return id;
@@ -226,7 +235,7 @@ class Workspace {
         for (let id in this._els) {
             if (this._els.hasOwnProperty(id) && this._els[id].constructor.name == 'Input') this._els[id].chain_eval();
         }
-        console.log("Evaluated");
+        this.stateChanged = false;
     }
 
     /**
@@ -321,8 +330,12 @@ class Workspace {
         if (data.e) {
             for (let el of data.e) {
                 let object = Workspace.createComponent(el.t, el.d, el.x, el.y);
-                if (el.l) object.label = el.l;
-                if (object) workspace.addComponent(object, el.id);
+                if (object) {
+                    if (el.l) object.label = el.l;
+                    workspace.addComponent(object, el.id);
+                } else {
+                    app.message(`Malformed component data. Unable to create component.\nData block: ${JSON.stringify(el)}`, ERROR, "Assembly Error");
+                }
             }
         }
 
@@ -333,15 +346,13 @@ class Workspace {
                     workspace.connectComponents(...conn);
                 } catch (e) {
                     console.error(e);
-                    app.message(`File Read Error.\nError with connection [${conn}]:\n${e.message}`);
+                    app.message(`Error with connection [${conn}]:\n${e.message}`, ERROR, "Assembly Error");
                 }
             }
         }
 
-        // Opt data
-        if (data.o) {
-            app.setOptData(data.o);
-        }
+        // app.opts data
+        if (data.o) app.setOptData(data.o);
 
         return workspace;
     }

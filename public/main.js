@@ -1,4 +1,4 @@
 function main() {
-  menu.openFile.open({ name: 'test2', passwd: 'hallo' });
+  menu.openFile.open({ name: 'xor' });
   return 0;
 }

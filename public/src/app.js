@@ -122,8 +122,10 @@ const app = {
         let json;
         try {
           json = JSON.parse(this.file.data);
-        } catch {
-          this.message(`File ${this.file.name} is corrupted and cannot be opened`, ERROR);
+        } catch (e) {
+          console.error(e);
+          this.message(`File ${this.file.name} is corrupted and cannot be opened\nError: ` + e.message, ERROR);
+          app.closeWorkspace();
           return;
         }
 
@@ -134,6 +136,7 @@ const app = {
         this.statusbar.item('File', '*New*');
       }
       this.statusbar.item('Up-To-Date', 'Yes');
+      this.history.reset();
       hide(this.html.canvasContainer, false);
       hide(this.html.optionsNofile, true);
       hide(this.html.optionsFile, false);
@@ -151,6 +154,7 @@ const app = {
       hide(this.html.optionsNofile, false);
       hide(this.html.optionsFile, true);
       hide(this.html.nav, true);
+      this.history.reset();
       this.setOptData(this.defaultOptData());
 
       // Clear file info
@@ -161,12 +165,73 @@ const app = {
     }
   },
 
+  /** Manage history of app.workspace */
+  history: {
+    _: [],
+    i: -1, // Position of current version
+
+    reset() {
+      this._.length = 0;
+      this.i = -1;
+    },
+
+    /** Add item to history */
+    push() {
+      this._.push(app.workspace.toObject());
+      this.i++;
+    },
+
+    /** Remove item from history */
+    pop() {
+      if (this._.length > 0) {
+        this._.pop();
+        this.i--;
+      }
+    },
+
+    /** Register change to workspace */
+    registerChange(wasChange) {
+      if (wasChange) {
+        app.workspace.contentAltered = true;
+      } else {
+        this.pop();
+      }
+    },
+
+    /** Undo to i - 1 */
+    undo() {
+      if (this._[this.i] != undefined) {
+        app.workspace = Workspace.fromObject(this._[this.i--]);
+        return true;
+      }
+      return false;
+    },
+
+    redo() {
+      if (this._[this.i + 1] != undefined) {
+        app.workspace = Workspace.fromObject(this._[++this.i]);
+        return true;
+      }
+      return false;
+    },
+
+    /** Press undo button */
+    undoBtn() {
+      if (!this.undo()) Sounds.play('error');
+    },
+
+    /** Press undo button */
+    redoBtn() {
+      if (!this.redo()) Sounds.play('error');
+    },
+  },
+
   /** 
    * Show message
    * @param {string} msg
    * @param {number} lvl - Level of message. -1: log, 0: info, 1: warning, 2: error
   */
-  message(msg, lvl = 0) {
+  message(msg, lvl = 0, extra = undefined) {
     switch (lvl) {
       case -1:
         console.log('[LOG] %c' + msg, 'font-style:italic;color:gray;');
@@ -178,7 +243,8 @@ const app = {
       case 2:
         Sounds.get("error").play(); // THis ensures the sound cannot be stacked
         console.error('[ERROR] ' + msg);
-        alert(`⚠ Error ⚠\n${msg}`);
+        let title = typeof extra == 'string' ? extra : "Error";
+        alert(`⚠ ${title} ⚠\n${msg}`);
         break;
       default:
         console.log('[SERVER] %c' + msg, 'font-style:italic;color:gray;');

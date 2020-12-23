@@ -37,6 +37,11 @@ body.dragging {
     box-shadow: 0px 2px 4px -2px black;
 }
 
+.menu-bar>div {
+    display: inline-block;
+    margin: 7px;
+}
+
 ul.inline>li,
 ol.inline>li {
     list-style: none;

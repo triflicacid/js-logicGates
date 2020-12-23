@@ -24,15 +24,7 @@ function draw() {
             app.statusbar.item('Up-To-Date', app.workspace.contentAltered ? 'No' : 'Yes');
         }
 
-        // Evaluate / show info
-        if (app.workspace.stateChanged) {
-            app.workspace.evaluate();
-            app.workspace.stateChanged = false;
-
-            // app.html.booleanAlgebraTable.innerHTML = '';
-            // app.html.booleanAlgebraTable.insertAdjacentElement('beforeend', generateAlgebraTable(app.workspace));
-        }
-
+        if (app.workspace.stateChanged) app.workspace.evaluate();
         if (app.workspace.componentOver && !app.workspace.componentDragging) app.workspace.componentOverTicks++;
 
         // Render
@@ -62,19 +54,23 @@ function mousePressed() {
 
     if (app.workspace.componentOver) {
         if (!app.opts.readonly && app.workspace.componentOver.event_mstart()) {
+            app.history.push();
             app.workspace.componentDragging = true;
             app.workspace.componentBeenMoved = false;
         }
     } else if (app.workspace.connNodeOver) {
         // Only allow creating connection from output
         if (!app.opts.readonly && !app.workspace.connNodeOver[1]) {
+            app.history.push();
             app.workspace.connTo = [NaN, NaN];
         }
     }
 }
 
 function mouseMoved() {
-    if (!app.workspace || app.isFrozen || !isHidden(app.html.cover)) return;
+    if (!app.workspace) return;
+    if (!isNaN(app.workspace.componentOverTicks)) app.workspace.componentOverTicks = 0;
+    if (app.isFrozen || !isHidden(app.html.cover)) return;
 
     if (!app.workspace.componentDragging && app.workspace.connTo == null && (mouseX != app.workspace.overCoords[0] || mouseY != app.workspace.overCoords[1])) {
         app.workspace.componentDragging = false;
@@ -101,7 +97,9 @@ function mouseMoved() {
 }
 
 function mouseDragged() {
-    if (!app.workspace || app.isFrozen || app.opts.readonly || !isHidden(app.html.cover)) return;
+    if (!app.workspace) return;
+    if (!isNaN(app.workspace.componentOverTicks)) app.workspace.componentOverTicks = 0;
+    if (app.isFrozen || app.opts.readonly || !isHidden(app.html.cover)) return;
 
     if (app.workspace.componentDragging) {
         if (mouseX < app.workspace.componentDragging.w / 2 || mouseX > width - app.workspace.componentDragging.w / 2
@@ -111,7 +109,7 @@ function mouseDragged() {
         app.workspace.componentBeenMoved = true;
         app.workspace.overCoords[0] = mouseX;
         app.workspace.overCoords[1] = mouseY;
-        app.workspace.contentAltered = true;
+        app.history.registerChange(true);
         app.workspace.componentOver.event_drag();
     } else if (app.workspace.connTo != null) {
         const r = app.opts.cnodew / 2;
@@ -129,11 +127,15 @@ function mouseReleased() {
         app.workspace.componentOver.event_click();
         if (app.workspace.componentOver instanceof Label) Label.selected = app.workspace.componentOver;
         app.workspace.componentDragging = false;
+        app.history.registerChange(true);
     } else if (app.workspace.componentDragging) {
         app.workspace.componentDragging = false;
         app.workspace.componentBeenMoved = false;
         app.workspace.componentOver.event_mstop();
+        app.history.registerChange(true);
     } else if (app.workspace.connTo) {
+        let ok = false;
+
         // Is over destination node?
         let over = getThingOver(mouseX, mouseY);
         if (Array.isArray(over)) {
@@ -144,33 +146,69 @@ function mouseReleased() {
                 // Is input connector, and not connected
                 if (conn.c == null) {
                     app.workspace.connectComponents(app.workspace.connNodeOver[0], app.workspace.connNodeOver[2], over[0], over[2]);
-                    app.workspace.contentAltered = true;
+                    ok = true;
+                    app.workspace.stateChanged = true;
                 } else console.log("Already connected");
             } else console.log("Can only connect output -> input");
         } else console.log("Destination is not a node");
         app.workspace.connTo = null;
+        app.history.registerChange(ok);
     }
 }
 
 function keyPressed(event) {
-    if (!app.workspace || app.opts.readonly || !isHidden(app.html.cover)) return;
+    if (app.opts.readonly || !isHidden(app.html.cover)) return;
 
-    if (key == 'Delete') {
-        if (app.workspace.componentOver) {
-            if (app.workspace.componentOver.event_delete() && confirm(`Delete ${app.workspace.componentOver.name}?`)) {
-                app.workspace.removeComponent(app.workspace.componentOver);
-                app.workspace.stateChanged = true;
-                app.workspace.contentAltered = true;
-                app.workspace.componentOver = false;
+    if (app.workspace) {
+        if (event.key == 'Delete') {
+            if (app.workspace.componentOver) {
+                if (app.workspace.componentOver.event_delete() && confirm(`Delete ${app.workspace.componentOver.name}?`)) {
+                    app.history.push();
+                    app.workspace.removeComponent(app.workspace.componentOver);
+                    app.workspace.stateChanged = true;
+                    app.workspace.componentOver = false;
+                    app.history.registerChange(true);
+                }
+            } else if (app.workspace.connNodeOver) {
+                // Remove all connections?
+                app.history.push();
+                removeConn(app.workspace._els[app.workspace.connNodeOver[0]], app.workspace.connNodeOver[1], app.workspace.connNodeOver[2]);
+                app.history.registerChange(true);
+            } else {
+                menu.deleteFile.showPopup(true);
             }
-        } else if (app.workspace.connNodeOver) {
-            // Remove all connections?
-            removeConn(app.workspace._els[app.workspace.connNodeOver[0]], app.workspace.connNodeOver[1], app.workspace.connNodeOver[2]);
-            app.workspace.contentAltered = true;
+        } else if (Label.selected) {
+            app.history.push();
+            Label.selected.type(event);
+            app.history.registerChange(true);
+            return false;
+        } else if (event.key == 'b') {
+            menu.boolAlgebra.popup(true, app.workspace.componentOver);
+        } else if (event.key == 't') {
+            menu.traceTable.popup(true);
+        } else if (event.ctrlKey) {
+            // Ctrl + shortcuts
+            if (event.key == 's') {
+                menu.saveFile();
+                return false;
+            } else if (event.key == 'S') {
+                menu.saveAs.showPopup(true);
+            } else if (event.key == 'z') {
+                app.history.undoBtn();
+            } else if (event.key == 'y') {
+                app.history.redoBtn();
+            }
+        } else if (event.key == 'Escape') {
+            menu.exitFile.exit();
+        } else {
+            console.log(event);
         }
-    } else if (Label.selected) {
-        Label.selected.type(event);
-        app.workspace.contentAltered = true;
-        return false;
+    } else {
+        if (event.ctrlKey) {
+            if (event.key == 'o') {
+                menu.openFile.showPopup(true);
+                return false;
+            }
+        }
     }
 }

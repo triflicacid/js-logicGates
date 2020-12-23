@@ -1,6 +1,7 @@
 # Logic Gate
 
 JavaScript app to create and edit logic gate circuits
+
 I've already made a logic gate editor before, but it was quite heavy-weight and restricted
 
 ## Key differences
@@ -18,10 +19,13 @@ Stored under `src/lib/*`
 
 ## Attributions
 
-- `Label`, `Comment` icons made by [Freepik from www.flaticon.com](https://www.flaticon.com/authors/freepik)
+- `Label`, `Comment`, `Trace Table` icons made by [Freepik from www.flaticon.com](https://www.flaticon.com/authors/freepik)
+- `Share` icon made by [Pixel perfect from www.flaticon.com](https://www.flaticon.com/authors/pixel-perfect)
 
 ---
 
-Author: Ruben Saunders\
-Created: 18/12/2020, 17:16\
+Author: Ruben Saunders
+
+Created: 18/12/2020, 17:16
+
 Status: In Development

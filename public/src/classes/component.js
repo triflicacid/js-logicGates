@@ -39,7 +39,7 @@ class Component {
      */
     renderConns() {
         if (this.inputs.length != 0) {
-            strokeWeight(2);
+            strokeWeight(app.opts.cnodew / 2);
             stroke(51);
             noFill();
             for (let i = 0; i < this.inputs.length; i++) {
@@ -216,7 +216,14 @@ class LabeledComponent extends Component {
 
     render(fn) {
         super.render(fn);
-        if (app.opts.showBLabels) this._labelObj.render(true);
+        if (app.opts.showBLabels) {
+            this._labelObj.render(true);
+            if (app.opts.debug) {
+                stroke(255, 100, 200);
+                strokeWeight(3);
+                line(this.x, this.y - this.h / 2, this._labelObj.x, this._labelObj.y + this._labelObj.h / 2);
+            }
+        }
     }
 
     toObject() {

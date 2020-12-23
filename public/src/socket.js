@@ -16,6 +16,7 @@ const socket = {
     this._.on('wrote-file', fname => typeof this.writeFile.callback == 'function' && this.writeFile.callback(fname));
     this.writeFile.callback = () => {
       if (app.workspace) app.workspace.contentAltered = false;
+      app.history.reset();
       if (menu.exitFile.closeAfterSave) {
         menu.exitFile.exit();
         menu.exitFile.closeAfterSave = false;

@@ -208,6 +208,7 @@ const menu = {
     cpreview: document.getElementById('ao-cpreview'),
     cpreviewVal: document.getElementById('ao-cpreview-val'),
     readonly: document.getElementById('ao-readonly'),
+    debug: document.getElementById('ao-debug'),
 
     init() {
       this.gridSize.addEventListener('input', event => {
@@ -229,6 +230,7 @@ const menu = {
         menu.advancedOpts.cpreviewVal.innerText = event.target.value;
       });
       this.readonly.addEventListener('change', event => app.opts.readonly = event.target.checked);
+      this.debug.addEventListener('change', event => app.opts.debug = event.target.checked);
       this.update();
     },
 
@@ -250,6 +252,7 @@ const menu = {
       this.cpreview.value = app.opts.commentPreview;
       this.cpreviewVal.innerText = app.opts.commentPreview;
       this.readonly.checked = app.opts.readonly;
+      this.debug.checked = app.opts.debug;
     },
 
     /** Reset to original options */
@@ -329,6 +332,143 @@ const menu = {
       hide(app.html.nav, hideStuff);
       hide(app.statusbar._, hideStuff);
       hide(app.html.menuBar, hideStuff);
+    },
+  },
+
+  uploadFile: {
+    _: document.getElementById('popup-upload'),
+    input: document.getElementById('upload-input'),
+
+    showPopup(show) {
+      hide(app.html.cover, !show);
+      hide(this._, !show);
+    },
+
+    upload() {
+      if (this.input.files.length == 1) {
+        let file = this.input.files[0];
+        let name = file.name;
+        if (name.substr(name.length - 4, 4) != '.lgc') return app.message('File must be .lgc', ERROR);
+        name = name.substring(0, name.length - 4);
+
+        let freader = new FileReader();
+        freader.onload = event => {
+          this.showPopup(false);
+          const data = atob(event.target.result);
+          menu.saveAs.openAfter = true;
+          app.file.open = false;
+          app.file.name = name;
+          app.file.data = data;
+          socket.newFile.request(name, null, data);
+        };
+        freader.readAsBinaryString(file);
+      } else {
+        app.message('Please select one file to upload', INFO);
+      }
+    },
+  },
+
+  /** Boolean algebraic representation of circuit */
+  boolAlgebra: {
+    _: document.getElementById('popup-bool-algebra'),
+    target: document.getElementById('bool-algebra-text'),
+
+    /**
+     * @param {boolean} show - Show popup?
+     * @param {Component | undefined} obj - Which component to who algebra for?
+     */
+    popup(show, obj = undefined) {
+      hide(app.html.cover, !show);
+      hide(this._, !show);
+
+      if (show) {
+        if (obj) {
+          this.target.innerHTML = this.write(obj);
+        } else {
+          this.target.innerHTML = this.writeAll().join('<br>');
+        }
+      } else {
+        this.target.innerHTML = '';
+      }
+    },
+
+    /** Populate textarea with algebra for provided component */
+    write(c) {
+      let algebra = c.backtrace();
+      let subbed = c.backtrace(true);
+      while (algebra[0] == '(') {
+        algebra = algebra.substr(1, algebra.length - 2);
+        subbed = subbed.substr(1, subbed.length - 2);
+      }
+      let line = algebra + ' = ' + subbed + ' = ' + c.state;
+      return line;
+    },
+
+    /** Populate textarea with algebra for all outputs */
+    writeAll() {
+      let lines = [];
+      app.workspace.forEachComponent(c => {
+        if (c instanceof Output) lines.push(c.label + ' = ' + this.write(c));
+      });
+      return lines;
+    },
+  },
+
+  traceTable: {
+    _: document.getElementById('popup-trace-table'),
+    table: document.getElementById('trace-table'),
+
+    popup(show) {
+      hide(app.html.cover, !show);
+      hide(this._, !show);
+      if (show) {
+        this.table.innerHTML = this.generate();
+      }
+    },
+
+    generate() {
+      let html;
+      noLoop(); // Stop rendering to reduce lag
+      {
+
+        // Array of inputs/outputs
+        const components = Object.values(app.workspace._els);
+        const inputs = components.filter(c => c instanceof Input), outputs = components.filter(c => c instanceof Output);
+
+        // Labels
+        html = `<thead><tr><th colspan='${inputs.length}'>Inputs</th><th colspan='${outputs.length}'>Outputs</th></tr><tr>`;
+        for (const input of inputs) html += `<th>${input.label}</th>`;
+        for (const output of outputs) html += `<th>${output.label}</th>`;
+        html += '</thead>';
+
+        // Record original states
+        const originalStates = inputs.map(c => c.state);
+
+        const inputStates = getCombos(inputs.length);
+        const outputStates = [];
+        for (const states of inputStates) {
+          // Set states
+          for (let i = 0; i < states.length; i++) inputs[i].state = states[i];
+          app.workspace.evaluate();
+
+          // Get output states
+          outputStates.push(outputs.map(c => c.state));
+        }
+
+        html += '<tbody>';
+        for (let i = 0; i < inputStates.length; i++) {
+          html += '<tr>';
+          for (let j = 0; j < inputStates[i].length; j++) html += `<td>${getHTMLState(inputStates[i][j])}</td>`;
+          for (let j = 0; j < outputStates[i].length; j++) html += `<td>${getHTMLState(outputStates[i][j])}</td>`;
+          html += '</tr>';
+        }
+        html += '</tbody>';
+
+        // Reset states
+        for (let i = 0; i < inputs.length; i++) inputs[i].state = originalStates[i];
+      }
+      loop();
+      return html;
     },
   },
 };
