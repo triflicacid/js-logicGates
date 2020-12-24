@@ -107,7 +107,7 @@ function removeConn(comp, isInput, cindex) {
     if (Array.isArray(obj.c)) {
         // OUTPUT connection
         for (let i = 0; i < obj.c.length; i++) {
-            // Remove conn object stored in output.c[i].inputs array
+            obj.c[i].state = 0;
             obj.c[i].inputs[obj.ci[i]].c = null;
             obj.c[i].inputs[obj.ci[i]].ci = NaN;
         }
@@ -125,6 +125,7 @@ function removeConn(comp, isInput, cindex) {
         // Remove our version
         obj.c = null;
         obj.ci = NaN;
+        comp.state = 0;
     }
 }
 
@@ -183,4 +184,36 @@ const getCombos = n => {
         combos.push(arr);
     }
     return combos;
+};
+
+/**
+ * Download client-side text as file
+ * @param {string} text     Text to download in file
+ * @param {string} name     What should we name the file?
+ */
+const downloadTextFile = (text, name) => {
+    let data = new Blob([text], { type: 'text/plain' });
+    let url = window.URL.createObjectURL(data);
+    downloadLink(url, name);
+};
+
+/**
+ * Create <a download></a> link and click it
+ * @param {string} href - Link to file to download
+ * @param {string} name - Name of file to download
+ */
+const downloadLink = (href, name) => {
+    const a = document.createElement('a');
+    a.href = href;
+    a.setAttribute('download', name);
+    a.click();
+    a.remove();
+};
+
+const playSound = name => {
+    try {
+        Sounds.play(name);
+    } catch {
+        console.warn(`[!] playSound: unable to play sound '${name}'`);
+    }
 };

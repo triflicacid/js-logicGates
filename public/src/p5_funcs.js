@@ -4,16 +4,7 @@ function setup() {
     app.p5canvas.parent(app.html.canvasContainer);
     app.init();
 
-    initLogicGateData();
-
-    Sounds.create('click', './sound/click.mp3');
-    Sounds.create('error', './sound/error.mp3');
-
     frameRate(app.fps);
-
-    if (typeof window.main == 'function') {
-        app.tryCatchWrap(window.main);
-    }
 }
 
 let lastChangeAlteredValue = true;
@@ -25,7 +16,7 @@ function draw() {
         }
 
         if (app.workspace.stateChanged) app.workspace.evaluate();
-        if (app.workspace.componentOver && !app.workspace.componentDragging) app.workspace.componentOverTicks++;
+        incTicks();
 
         // Render
         app.workspace.render();
@@ -37,6 +28,11 @@ function draw() {
         textAlign(CENTER);
         text('No workspace is currently open', width / 2, height / 2);
     }
+}
+
+function incTicks() {
+    if (app.isFrozen || !isHidden(app.html.cover) || !app.workspace.componentOver || app.workspace.componentDragging) return;
+    app.workspace.componentOverTicks++;
 }
 
 function mousePressed() {
@@ -116,6 +112,19 @@ function mouseDragged() {
         if (mouseX < r || mouseX > width - r || mouseY < r || mouseY > height - r) return;
         app.workspace.connTo[0] = Math.round(mouseX);
         app.workspace.connTo[1] = Math.round(mouseY);
+
+        // Hover over another node
+        let over = getThingOver(mouseX, mouseY);
+        if (over != null && !(over instanceof Component)) {
+            app.workspace.connNodeOver2 = over;
+            getConn(app.workspace, over).h = true;
+        } else {
+            // Clear hover node?
+            if (app.workspace.connNodeOver2) {
+                getConn(app.workspace, app.workspace.connNodeOver2).h = false;
+                app.workspace.connNodeOver2 = null;
+            }
+        }
     }
 }
 
@@ -145,6 +154,7 @@ function mouseReleased() {
             if (!app.workspace.connNodeOver[1] && !Array.isArray(conn.c)) {
                 // Is input connector, and not connected
                 if (conn.c == null) {
+                    console.log(app.workspace.connNodeOver[0], app.workspace.connNodeOver[2], over[0], over[2]);
                     app.workspace.connectComponents(app.workspace.connNodeOver[0], app.workspace.connNodeOver[2], over[0], over[2]);
                     ok = true;
                     app.workspace.stateChanged = true;
@@ -185,7 +195,9 @@ function keyPressed(event) {
         } else if (event.key == 'b') {
             menu.boolAlgebra.popup(true, app.workspace.componentOver);
         } else if (event.key == 't') {
-            menu.traceTable.popup(true);
+            menu.traceTable.popup(true, app.workspace.componentOver);
+        } else if (event.keyCode == 32) {
+            app.html.evalBtn.click();
         } else if (event.ctrlKey) {
             // Ctrl + shortcuts
             if (event.key == 's') {
@@ -200,8 +212,6 @@ function keyPressed(event) {
             }
         } else if (event.key == 'Escape') {
             menu.exitFile.exit();
-        } else {
-            console.log(event);
         }
     } else {
         if (event.ctrlKey) {

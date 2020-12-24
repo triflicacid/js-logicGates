@@ -289,6 +289,52 @@ const menu = {
     },
   },
 
+  /** Stuff for CLock component */
+  clockComponent: {
+    _: document.getElementById('popup-clock'),
+    input: document.getElementById('popup-clock-input'),
+    speed: document.getElementById('popup-clock-speed'),
+    obj: null,
+
+    init() {
+      this.input.setAttribute('min', Clock.min);
+      this.input.setAttribute('max', Clock.max);
+      this.input.addEventListener('change', this.update.bind(this));
+    },
+
+    open(obj) {
+      hide(this._, false);
+      hide(app.html.cover, false);
+      this.obj = obj;
+      this.input.value = obj.every;
+      this.speed.innerText = obj.hertz();
+      if (app.opts.readonly) this.input.setAttribute('readonly', 'readonly');
+      if (app.workspace.isRunning) app.html.evalBtn.click();
+    },
+
+    /** Update obj and rendering */
+    update() {
+      let val = +this.input.value;
+      if (isNaN(val)) val = this.obj.every;
+      else if (val < Clock.min) val = Clock.min;
+      else if (val > Clock.max) val = Clock.max;
+      this.input.value = val;
+      this.obj.every = val;
+      this.speed.innerText = this.obj.hertz();
+    },
+
+    close() {
+      hide(this._, true);
+      hide(app.html.cover, true);
+      this.speed.innertext = '';
+      this.input.value = '';
+      this.obj.event_click();
+      this.obj = null;
+      this.input.removeAttribute('readonly');
+      if (!app.workspace.isRunning) app.html.evalBtn.click();
+    },
+  },
+
   /** Download canvas as image */
   downloadImage() {
     let image = app.p5canvas.elt.toDataURL("image/png").replace("image/png", "image/octet-stream");
@@ -298,7 +344,6 @@ const menu = {
 
   share: {
     _: document.getElementById('popup-share'),
-    fileLink: document.getElementById('download-file-a'),
 
     showPopup(show) {
       hide(app.html.cover, !show);
@@ -307,17 +352,14 @@ const menu = {
 
     /** Download as image */
     image() {
-      let image = app.p5canvas.elt.toDataURL("image/png").replace("image/png", "image/octet-stream");
-      window.open(image);
+      let link = app.p5canvas.elt.toDataURL("image/png");
+      downloadLink(link, (app.file.name || 'unnamed') + '.png');
       this.showPopup(false);
     },
 
     file() {
       let text = JSON.stringify(app.workspace.toObject());
-      let data = new Blob([btoa(text)], { type: 'text/plain' });
-      let url = window.URL.createObjectURL(data);
-      this.fileLink.href = url;
-      this.fileLink.click();
+      downloadTextFile(btoa(text), (app.file.name || "unnamed") + '.lgc');
       this.showPopup(false);
     },
 
@@ -372,6 +414,7 @@ const menu = {
   boolAlgebra: {
     _: document.getElementById('popup-bool-algebra'),
     target: document.getElementById('bool-algebra-text'),
+    data: null,
 
     /**
      * @param {boolean} show - Show popup?
@@ -382,11 +425,8 @@ const menu = {
       hide(this._, !show);
 
       if (show) {
-        if (obj) {
-          this.target.innerHTML = this.write(obj);
-        } else {
-          this.target.innerHTML = this.writeAll().join('<br>');
-        }
+        this.data = obj ? this.write(obj) : this.writeAll();
+        this.target.innerHTML = Array.isArray(this.data) ? this.data.join('<br>') : this.data;
       } else {
         this.target.innerHTML = '';
       }
@@ -396,7 +436,7 @@ const menu = {
     write(c) {
       let algebra = c.backtrace();
       let subbed = c.backtrace(true);
-      while (algebra[0] == '(') {
+      while (algebra[0] == '(' && algebra[algebra.length - 1] == ')') {
         algebra = algebra.substr(1, algebra.length - 2);
         subbed = subbed.substr(1, subbed.length - 2);
       }
@@ -412,63 +452,136 @@ const menu = {
       });
       return lines;
     },
+
+    /** Download this.data as txt file */
+    download() {
+      const text = Array.isArray(this.data) ? this.data.join('\n') : this.data;
+      const fname = 'boolean-algebra.txt';
+      downloadTextFile(text, fname);
+    },
   },
 
   traceTable: {
     _: document.getElementById('popup-trace-table'),
     table: document.getElementById('trace-table'),
+    title: document.getElementById('trace-table-title'),
+    data: null,
 
-    popup(show) {
+    /** @param {Component} obj - Component over */
+    popup(show, obj = undefined) {
       hide(app.html.cover, !show);
       hide(this._, !show);
       if (show) {
-        this.table.innerHTML = this.generate();
+        let [data, inputs, outputs] = obj instanceof LogicGate ? this.generate(obj) : this.generateWorkspace();
+        this.title.innerText = obj instanceof LogicGate ? obj.name : 'Circuit';
+        this.table.innerHTML = this.toHTML(inputs, outputs, data);
+        this.data = data;
       }
     },
 
-    generate() {
-      let html;
-      noLoop(); // Stop rendering to reduce lag
-      {
+    /**
+     * Generate trace table for a logic gate
+     * @return {[any[][], number, number]} [data, input count, output count]
+     */
+    generate(gate) {
+      let data = [];
 
-        // Array of inputs/outputs
-        const components = Object.values(app.workspace._els);
-        const inputs = components.filter(c => c instanceof Input), outputs = components.filter(c => c instanceof Output);
+      // Logic Function
+      const fn = LogicGate.data[gate.type].fn;
 
-        // Labels
-        html = `<thead><tr><th colspan='${inputs.length}'>Inputs</th><th colspan='${outputs.length}'>Outputs</th></tr><tr>`;
-        for (const input of inputs) html += `<th>${input.label}</th>`;
-        for (const output of outputs) html += `<th>${output.label}</th>`;
-        html += '</thead>';
+      // "Labels" for I/O
+      data[0] = [];
+      for (let i = 0; i < gate.inputs.length; i++) data[0].push('i' + (i + 1));
+      data[0].push('out');
 
-        // Record original states
-        const originalStates = inputs.map(c => c.state);
-
-        const inputStates = getCombos(inputs.length);
-        const outputStates = [];
-        for (const states of inputStates) {
-          // Set states
-          for (let i = 0; i < states.length; i++) inputs[i].state = states[i];
-          app.workspace.evaluate();
-
-          // Get output states
-          outputStates.push(outputs.map(c => c.state));
-        }
-
-        html += '<tbody>';
-        for (let i = 0; i < inputStates.length; i++) {
-          html += '<tr>';
-          for (let j = 0; j < inputStates[i].length; j++) html += `<td>${getHTMLState(inputStates[i][j])}</td>`;
-          for (let j = 0; j < outputStates[i].length; j++) html += `<td>${getHTMLState(outputStates[i][j])}</td>`;
-          html += '</tr>';
-        }
-        html += '</tbody>';
-
-        // Reset states
-        for (let i = 0; i < inputs.length; i++) inputs[i].state = originalStates[i];
+      const allStates = getCombos(gate.inputs.length);
+      for (const states of allStates) {
+        let output = fn(...states);
+        data.push(states.map(s => +s).concat([output]));
       }
+
       loop();
+      return [data, gate.inputs.length, 1];
+    },
+
+    /**
+     * Generate Trace Table data from whole workspace
+     * @return {[any[][], number, number]} [data, input count, output count]
+     */
+    generateWorkspace() {
+      let data = [];
+      noLoop(); // Stop rendering to reduce lag
+
+      // Array of inputs/outputs
+      const components = Object.values(app.workspace._els);
+      const inputs = components.filter(c => c instanceof Input), outputs = components.filter(c => c instanceof Output);
+
+      // Record labels
+      data[0] = inputs.map(c => c.label).concat(outputs.map(c => c.label));
+
+      // Record original states
+      const originalStates = inputs.map(c => c.state);
+
+      const inputStates = getCombos(inputs.length);
+      for (const states of inputStates) {
+        // Set states
+        for (let i = 0; i < states.length; i++) inputs[i].state = states[i];
+        app.workspace.evaluate();
+
+        // Get output states
+        data.push(states.map(s => +s).concat(outputs.map(c => c.state)));
+      }
+
+      // Reset states
+      for (let i = 0; i < inputs.length; i++) inputs[i].state = originalStates[i];
+
+      loop();
+      return [data, inputs.length, outputs.length];
+    },
+
+    toCSV() {
+      return Array.isArray(this.data) ? this.data.map(row => row.map(x => typeof x == 'number' ? x : `"${x}"`).join(',')).join('\n') : "";
+    },
+
+    /**
+     * Generate HTML data from table
+     * @param {number} inputs - Number of inputs
+     * @param {number} outputs - Number of outputs
+     * @param {any[][]} data - Trace table data 
+     */
+    toHTML(inputs, outputs, data) {
+      let html = '';
+      html += `<thead><tr><th colspan="${inputs}">Inputs</th><th colspan="${outputs}">Outputs</th></tr>`;
+      for (let i = 0; i < data[0].length; i++) html += `<th>${data[0][i]}</th>`;
+      html += '</tr></thead><tbody>';
+      for (let i = 1; i < data.length; i++) {
+        html += '<tr>';
+        for (let j = 0; j < data[i].length; j++) {
+          html += '<td>' + getHTMLState(data[i][j]) + '</td>';
+        }
+        html += '</tr>';
+      }
+      html += '</tbody>';
       return html;
     },
+
+    /** Download this.data as CSV */
+    download() {
+      const text = this.toCSV();
+      const fname = (this.title.innerText + ' trace table.csv').toLowerCase().split(' ').join('-');
+      downloadTextFile(text, fname);
+    },
+  },
+
+  /** Update display for evalBtn */
+  renderEvalBtn() {
+    const btn = app.html.evalBtn;
+    if (app.workspace.isRunning) {
+      btn.innerHTML = '&#8214;';
+      btn.setAttribute('title', 'Pause Simulation');
+    } else {
+      btn.innerHTML = '&#9654;';
+      btn.setAttribute('title', 'Play Simulation');
+    }
   },
 };

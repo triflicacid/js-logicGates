@@ -32,12 +32,27 @@ class Workspace {
          * @type {[number, boolean, number] | null} [component id, isInput?, conn index]
          */
         this.connNodeOver = null;
+        this.connNodeOver2 = null;
 
         /**
          * Making connection to this position
          * @type {[number, number] | null}
         */
         this.connTo = null;
+
+        /** Are we evaluating? */
+        this._running = true;
+    }
+
+    get isRunning() { return this._running; }
+    set isRunning(value) {
+        this._running = !!value;
+        if (value) {
+            this.stateChanged = true;
+            this.evaluate();
+        } else {
+            for (let id in this._els) if (this._els.hasOwnProperty(id) && this._els[id] instanceof Clock) this._els[id].stop();
+        }
     }
 
     /** Render on this._ */
@@ -232,47 +247,42 @@ class Workspace {
     * EValuate components
     */
     evaluate() {
-        for (let id in this._els) {
-            if (this._els.hasOwnProperty(id) && this._els[id].constructor.name == 'Input') this._els[id].chain_eval();
+        if (this.isRunning) {
+            for (let id in this._els) {
+                if (this._els.hasOwnProperty(id) && this._els[id] instanceof Input) this._els[id].chain_eval();
+            }
+            this.stateChanged = false;
         }
-        this.stateChanged = false;
     }
 
     /**
-     * Get algebraic representation of "circuit" from a certain output
-     * @param {number} id       ID of output component to trace back from
+     * Terminate (close) workspace
      */
-    getAlgebraic(id) {
-        const c = this._els[id];
-        const trace = c.backtrace();
-        return (c.constructor.name == 'Output' ? `${c.label} = ` : '') + trace.substring(1, trace.length - 1);
+    terminate() {
+        for (let id in this._els) {
+            if (this._els.hasOwnProperty(id)) {
+                if (this._els[id] instanceof Clock) this._els[id].stop();
+                delete this._els[id];
+            }
+        }
     }
 
     /**
      * Get object representation of canvas
-     * - See saveDataStructure.txt for more information
+     * - See data/format.txt for more information
      * @return {object} JSON representation of canvas
      */
     toObject() {
-        const json = {};
-
-        // Option data
-        json.o = app.getOptData();
-
-        // Array of components ('elements')
-        json.e = [];
-
-        // Array of connections
-        json.c = [];
+        const json = { o: app.getOptData(), e: [], c: [] };
 
         this.forEachComponent((c) => {
             let data = c.toObject();
             if (data == null) return;
             json.e.push(data);
 
-            for (let output of c.outputs) {
-                for (let i = 0; i < output.c.length; i++) {
-                    json.c.push([c.id, i, output.c[i].id, output.ci[i]]);
+            for (let i = 0; i < c.outputs.length; i++) {
+                for (let j = 0; j < c.outputs[i].c.length; j++) {
+                    json.c.push([c.id, i, c.outputs[i].c[j].id, c.outputs[i].ci[j]]);
                 }
             }
         });
@@ -310,6 +320,11 @@ class Workspace {
             case CommentBox.ID: {
                 let c = new CommentBox(x, y);
                 if (typeof data == 'string') c.text = atob(data);
+                return c;
+            }
+            case Clock.ID: {
+                let c = new Clock(x, y);
+                if (typeof data === 'number') c.every = data;
                 return c;
             }
             default:

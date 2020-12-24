@@ -15,197 +15,219 @@
 </head>
 <body>
     <div class="cover"></div>
-    <div class="menu-bar">
-        <div id="options-nofile">
-            <a class="btn" href="javascript:void(0);" onclick="menu.openFile.showPopup(true);" title="Open File">&#128449; Open</a>
-            <a class="btn" href="javascript:void(0);" onclick="app.openWorkspace();" title="Create New Workspace">&#65291; New</a>
-            <a class="btn" href="javascript:void(0);" onclick="menu.uploadFile.showPopup(true);" title="Upload Circuit File">&#9650; Upload</a>
-        </div>
 
-        <div id="options-file">
-            <a class="btn" href="javascript:void(0);" onclick="menu.exitFile.exit();" title="Close Current Workspace">&#9587;</a>
-            <a class="btn" href="javascript:void(0);" onclick="menu.saveFile();" title="Save Current Workspace">&#128427;</a>
-            <a class="btn" href="javascript:void(0);" onclick="menu.saveAs.showPopup(true);" title="Save Current Workspace As">&#128393;</a>
-            <a class="btn" href="javascript:void(0);" onclick="menu.deleteFile.showPopup(true);" title="Delete Current Workspace/File">&#128465;</a>
-            <a class="btn" href="javascript:void(0);" onclick="menu.share.showPopup(true);" title="Share Workspace"><img src="img/share.png" /></a>
-            <a class="btn" href="javascript:void(0);" onclick="menu.advancedOpts.showPopup(true);" title="Advanced Options">&#9881;</a>
-            
-            <a class="btn" href="javascript:void(0);" onclick="app.history.undoBtn();" title="Undo">&#8634;</a>
-            <a class="btn" href="javascript:void(0);" onclick="app.history.redoBtn();" title="Redo">&#8635;</a>
-            <a class="btn" href="javascript:void(0);" onclick="menu.boolAlgebra.popup(true);" title="Boolean Algebra">&#402;</a>
-            <a class="btn" href="javascript:void(0);" onclick="menu.traceTable.popup(true);" title="Trace Table"><img src="img/table.png" /></a>
-        </div>
-    </div>
-
-    <div id="main" oncontextmenu="return false;">
-        <div id="nav" class="noselect striped">
-            <span>I/O</span>
-            <div>
-                <div onclick="app.startInsert(0);"><img src="img/input.png" /><br><span>Input</span></div>
-                <div onclick="app.startInsert(1);"><img src="img/output.png" /><br><span>Output</span></div>
+    <section data-topic="menu">
+        <div class="menu-bar">
+            <div id="options-nofile">
+                <a class="btn" href="javascript:void(0);" onclick="menu.openFile.showPopup(true);" title="Open File">&#128449; Open</a>
+                <a class="btn" href="javascript:void(0);" onclick="app.openWorkspace();" title="Create New Workspace">&#65291; New</a>
+                <a class="btn" href="javascript:void(0);" onclick="menu.uploadFile.showPopup(true);" title="Upload Circuit File">&#9650; Upload</a>
             </div>
 
-            <span>Logic Gates</span>
-            <div>
-                <div onclick="app.startInsert(2, 0);"><img src="img/buffer.png" /><br><span>Buffer</span></div>
-                <div onclick="app.startInsert(2, 1);"><img src="img/not.png" /><br><span>Not</span></div>
-                <div onclick="app.startInsert(2, 2);"><img src="img/and.png" /><br><span>And</span></div>
-                <div onclick="app.startInsert(2, 6);"><img src="img/nand.png" /><br><span>Nand</span></div>
-                <div onclick="app.startInsert(2, 3);"><img src="img/or.png" /><br><span>Or</span></div>
-                <div onclick="app.startInsert(2, 5);"><img src="img/nor.png" /><br><span>Nor</span></div>
-                <div onclick="app.startInsert(2, 4);"><img src="img/xor.png" /><br><span>Xor</span></div>
-                <div onclick="app.startInsert(2, 7);"><img src="img/xnor.png" /><br><span>Xnor</span></div>
+            <div id="options-file">
+                <a class="btn" href="javascript:void(0);" onclick="menu.exitFile.exit();" title="Close Current Workspace">&#9587;</a>
+                <a class="btn" href="javascript:void(0);" onclick="menu.saveFile();" title="Save Current Workspace">&#128427;</a>
+                <a class="btn" href="javascript:void(0);" onclick="menu.saveAs.showPopup(true);" title="Save Current Workspace As">&#128393;</a>
+                <a class="btn" href="javascript:void(0);" onclick="menu.deleteFile.showPopup(true);" title="Delete Current Workspace/File">&#128465;</a>
+                <a class="btn" href="javascript:void(0);" onclick="menu.share.showPopup(true);" title="Share Workspace"><img src="img/share.png" /></a>
+                
+                <span style="margin-right: 3vw;"></span>
+                
+                <a class="btn" href="javascript:void(0);" onclick="menu.advancedOpts.showPopup(true);" title="Settings">&#9881;</a>
+                <a class="btn" href="javascript:void(0);" onclick="app.history.undoBtn();" title="Undo">&#8634;</a>
+                <a class="btn" href="javascript:void(0);" onclick="app.history.redoBtn();" title="Redo">&#8635;</a>
+                <a class="btn" href="javascript:void(0);" id='btn-eval'></a>
+                <a class="btn" href="javascript:void(0);" onclick="menu.boolAlgebra.popup(true);" title="Boolean Algebra">&#402;</a>
+                <a class="btn" href="javascript:void(0);" onclick="menu.traceTable.popup(true);" title="Trace Table"><img src="img/table.png" /></a>
             </div>
+        </div>
+    </section>
 
-            <span>Utility</span>
-            <div>
-                <div onclick="app.startInsert(3);"><img src="img/label.png" /><br><span>Label</span></div>
-                <div onclick="app.startInsert(4);"><img src="img/comment.png" /><br><span>Comment</span></div>
+    <section data-topic="body">
+        <div id="main" oncontextmenu="return false;">
+            <div id="nav" class="noselect striped">
+                <span>I/O</span>
+                <div>
+                    <div onclick="app.startInsert(Input.ID);"><img src="img/input.png" /><br><span>Input</span></div>
+                    <div onclick="app.startInsert(Clock.ID);"><img src="img/clock-wave.png" /><br><span>Clock</span></div>
+                    <div onclick="app.startInsert(Output.ID);"><img src="img/output.png" /><br><span>Output</span></div>
+                </div>
+
+                <span>Logic Gates</span>
+                <div>
+                    <div onclick="app.startInsert(LogicGate.ID, 0);"><img src="img/buffer.png" /><br><span>Buffer</span></div>
+                    <div onclick="app.startInsert(LogicGate.ID, 1);"><img src="img/not.png" /><br><span>Not</span></div>
+                    <div onclick="app.startInsert(LogicGate.ID, 2);"><img src="img/and.png" /><br><span>And</span></div>
+                    <div onclick="app.startInsert(LogicGate.ID, 6);"><img src="img/nand.png" /><br><span>Nand</span></div>
+                    <div onclick="app.startInsert(LogicGate.ID, 3);"><img src="img/or.png" /><br><span>Or</span></div>
+                    <div onclick="app.startInsert(LogicGate.ID, 5);"><img src="img/nor.png" /><br><span>Nor</span></div>
+                    <div onclick="app.startInsert(LogicGate.ID, 4);"><img src="img/xor.png" /><br><span>Xor</span></div>
+                    <div onclick="app.startInsert(LogicGate.ID, 7);"><img src="img/xnor.png" /><br><span>Xnor</span></div>
+                </div>
+
+                <span>Utility</span>
+                <div>
+                    <div onclick="app.startInsert(Label.ID);"><img src="img/label.png" /><br><span>Label</span></div>
+                    <div onclick="app.startInsert(CommentBox.ID);"><img src="img/comment.png" /><br><span>Comment</span></div>
+                </div>
+            </div>
+            <div id="container"></div>
+        </div>
+    </section>
+
+    <section data-topic="statusbar">
+        <div id="statusbar" class="striped"></div>
+    </section>
+
+    <section data-topic="popups">
+        <div class="popup" id="popup-open-file">
+            <div class="centre">
+                <h2>Open File</h2>
+            </div>
+            <div id="file-list"></div>
+            <br>
+            <div class="centre">
+                <a class="btn" href="javascript:void(0);" onclick="menu.openFile.showPopup(false);">Close</a>
             </div>
         </div>
-        <div id="container"></div>
-    </div>
+        <div class="popup" id="popup-exit-save">
+            <div class="centre">
+                <h2>Save Before Closing?</h2>
+            </div>
+            <p>Save file <span class='current-file'></span> before closing?</p>
+            <div class="centre">
+                <a class="btn" href="javascript:void(0);" onclick="menu.exitFile.popupBtn(true);">Save</a>
+                <a class="btn" href="javascript:void(0);" onclick="menu.exitFile.popupBtn(false);">Close</a>
+                <a class="btn" href="javascript:void(0);" onclick="menu.exitFile.showPopup(false);">Cancel</a>
+            </div>
+        </div>
+        <div class="popup" id="popup-saveas">
+            <div class="centre">
+                <h2>Save As</h2>
+            </div>
+            <span>File Name</span> <input type="text" id="saveas-name" /> <br>
+            <span><abbr title="Password for protection. Optional.">Password</abbr></span> <input type="password" id="saveas-passwd" placeholder="Optional" /> <br>
+            <br>
+            <div class="centre">
+                <a class="btn" href="javascript:void(0);" onclick="menu.saveAs.save();">Save</a>
+                <a class="btn" href="javascript:void(0);" onclick="menu.saveAs.showPopup(false);">Cancel</a>
+            </div>
+        </div>
+        <div class="popup centre" id="popup-delete-file">
+            <h2>Delete File?</h2>
+            <p>
+                To delete <span class='current-file'></span>, enter the number below into the text box<br>
+                <span>Number: <code class="noselect" id="delete-file-num"></code></span>
+            </p>
+            <input type="number" id="delete-file-num-input" />
+            <br>
+            <br>
+            <a class="btn" href="javascript:void(0);" onclick="menu.deleteFile.delete();">Delete</a>
+            <a class="btn" href="javascript:void(0);" onclick="menu.deleteFile.showPopup(false);">Cancel</a>
+        </div>
+        <div class="popup centre" id="popup-adv-opts">
+            <h2>Advanced Options</h2>
+            <table>
+                <tr>
+                    <th>Grid Size</th>
+                    <td><input type="range" min="0" max="250" step="5" id="ao-grid-size" />  <span id="ao-grid-size-val"></span></td>
+                </tr>
+                <tr>
+                    <th>Wire Curve</th>
+                    <td><input type="range" min="0" max="150" step="2" id="ao-curviness" />  <span id="ao-curviness-val"></span></td>
+                </tr>
+                <tr>
+                    <th>Coloured Wires</th>
+                    <td><input type="checkbox" id="ao-coloured-wires" /></span></td>
+                </tr>
+                <tr>
+                    <th><abbr title="Width of connection nodes (black circles)">Node Width</abbr></th>
+                    <td><input type="range" min="5" max="15" step="1" id="ao-cnodew" />  <span id="ao-cnodew-val"></span></td>
+                </tr>
+                <tr>
+                    <th><abbr title="Display bound labels (immovable labels which follow components?)">Bound Labels</abbr></th>
+                    <td><input type="checkbox" id="ao-blabels" /></span></td>
+                </tr>
+                <tr>
+                    <th><abbr title="How long should preview text of a comment be?">Comments</abbr></th>
+                    <td><input type="range" min="10" max="70" step="1" id="ao-cpreview" />  <span id="ao-cpreview-val"></span></td>
+                </tr>
+                <tr>
+                    <th><abbr title="Block use from editing the file?">Readonly</abbr></th>
+                    <td><input type="checkbox" id="ao-readonly" /></span></td>
+                </tr>
+                <tr>
+                    <th><abbr title="Debug Mode (show extra info)">Debug</abbr></th>
+                    <td><input type="checkbox" id="ao-debug" /></span></td>
+                </tr>
+            </table>
+            <br>
+            <a class="btn" href="javascript:void(0);" onclick="menu.advancedOpts.reset();">Reset</a>
+            <a class="btn" href="javascript:void(0);" onclick="menu.advancedOpts.showPopup(false);">Close</a>
+        </div>
+        <div class="popup centre" id="popup-comment-box">
+            <textarea id="comment-box-text" rows="20" cols="80"></textarea>
+            <br><br>
+            <a class="btn" href="javascript:void(0);" onclick="menu.commentBox.close();">Close</a>
+        </div>
+        <div class="popup centre" id="popup-share">
+            <h2>Sharing Methods</h2>
+            <a href="javascript:void(0);" onclick="menu.share.image();" title="download.png">Download as Image</a><br>
+            <a href="javascript:void(0);" onclick="menu.share.file();" title="download.lgc">Downloas as File</a><br>
+            <a href="javascript:void(0);" onclick="menu.share.print();">Print</a><br>
+            <br>
+            <a class="btn" href="javascript:void(0);" onclick="menu.share.showPopup(false);">Close</a>
+        </div>
+        <div class="popup centre" id="popup-upload">
+            <h2>Upload File</h2>
+            <input type="file" id="upload-input" accept=".lgc" onchange="menu.uploadFile.upload();" />
+            <br><br>
+            <a class="btn" href="javascript:void(0);" onclick="menu.uploadFile.showPopup(false);">Close</a>
+        </div>
+        <div class="popup centre" id="popup-bool-algebra">
+            <h2>Boolean Algebra</h2>
+            <pre id='bool-algebra-text'></pre>
+            <a href="javascript:void(0);" onclick="menu.boolAlgebra.download();" title="Download as text file">Download</a>
+            <br><br>
+            <a class="btn" href="javascript:void(0);" onclick="menu.boolAlgebra.popup(false);">Close</a>
+        </div>
+        <div class="popup centre" id="popup-trace-table">
+            <h2 id='trace-table-title'>Trace Table</h2>
+            <table id='trace-table' class="centre" border='1'></table>
+            <br>
+            <a href="javascript:void(0);" onclick="menu.traceTable.download();" title="Download as CSV file">Download</a>
+            <br><br>
+            <a class="btn" href="javascript:void(0);" onclick="menu.traceTable.popup(false);">Close</a>
+        </div>
+        <div class="popup centre" id="popup-clock">
+            <h2>Clock</h2>
+            <p>State Duration: <input type='number' step='1' id='popup-clock-input' />  ms</p>
+            <p>Speed: <span id='popup-clock-speed'></span> Hz</p>
+            <br>
+            <a class="btn" href="javascript:void(0);" onclick="menu.clockComponent.close();">Close</a>
+        </div>
+    </section>
 
-    <div id="statusbar" class="striped"></div>
+    <section data-topic="scripts">
+        <!-- 
+        - External Entry Point: main.js @ main
+        - Internal Entry Point: src/p5_funcs.js @ setup()
+        -->
+        <script type="text/javascript" charset="utf-8" src="./src/app.js"></script>
 
-    <!-- ================= POPUPS ================= -->
-    <div class="popup" id="popup-open-file">
-        <div class="centre">
-            <h2>Open File</h2>
-        </div>
-        <div id="file-list"></div>
-        <br>
-        <div class="centre">
-            <a class="btn" href="javascript:void(0);" onclick="menu.openFile.showPopup(false);">Close</a>
-        </div>
-    </div>
-    <div class="popup" id="popup-exit-save">
-        <div class="centre">
-            <h2>Save Before Closing?</h2>
-        </div>
-        <p>Save file <span class='current-file'></span> before closing?</p>
-        <div class="centre">
-            <a class="btn" href="javascript:void(0);" onclick="menu.exitFile.popupBtn(true);">Save</a>
-            <a class="btn" href="javascript:void(0);" onclick="menu.exitFile.popupBtn(false);">Close</a>
-        </div>
-    </div>
-    <div class="popup" id="popup-saveas">
-        <div class="centre">
-            <h2>Save As</h2>
-        </div>
-        <span>File Name</span> <input type="text" id="saveas-name" /> <br>
-        <span><abbr title="Password for protection. Optional.">Password</abbr></span> <input type="password" id="saveas-passwd" placeholder="Optional" /> <br>
-        <br>
-        <div class="centre">
-            <a class="btn" href="javascript:void(0);" onclick="menu.saveAs.save();">Save</a>
-            <a class="btn" href="javascript:void(0);" onclick="menu.saveAs.showPopup(false);">Cancel</a>
-        </div>
-    </div>
-    <div class="popup centre" id="popup-delete-file">
-        <h2>Delete File?</h2>
-        <p>
-            To delete <span class='current-file'></span>, enter the number below into the text box<br>
-            <span>Number: <code class="noselect" id="delete-file-num"></code></span>
-        </p>
-        <input type="number" id="delete-file-num-input" />
-        <br>
-        <br>
-        <a class="btn" href="javascript:void(0);" onclick="menu.deleteFile.delete();">Delete</a>
-        <a class="btn" href="javascript:void(0);" onclick="menu.deleteFile.showPopup(false);">Cancel</a>
-    </div>
-    <div class="popup centre" id="popup-adv-opts">
-        <h2>Advanced Options</h2>
-        <table>
-            <tr>
-                <th>Grid Size</th>
-                <td><input type="range" min="0" max="250" step="5" id="ao-grid-size" />  <span id="ao-grid-size-val"></span></td>
-            </tr>
-            <tr>
-                <th>Wire Curve</th>
-                <td><input type="range" min="0" max="150" step="2" id="ao-curviness" />  <span id="ao-curviness-val"></span></td>
-            </tr>
-            <tr>
-                <th>Coloured Wires</th>
-                <td><input type="checkbox" id="ao-coloured-wires" /></span></td>
-            </tr>
-            <tr>
-                <th><abbr title="Width of connection nodes (black circles)">Node Width</abbr></th>
-                <td><input type="range" min="5" max="15" step="1" id="ao-cnodew" />  <span id="ao-cnodew-val"></span></td>
-            </tr>
-            <tr>
-                <th><abbr title="Display bound labels (immovable labels which follow components?)">Bound Labels</abbr></th>
-                <td><input type="checkbox" id="ao-blabels" /></span></td>
-            </tr>
-            <tr>
-                <th><abbr title="How long should preview text of a comment be?">Comments</abbr></th>
-                <td><input type="range" min="10" max="70" step="1" id="ao-cpreview" />  <span id="ao-cpreview-val"></span></td>
-            </tr>
-            <tr>
-                <th><abbr title="Block use from editing the file?">Readonly</abbr></th>
-                <td><input type="checkbox" id="ao-readonly" /></span></td>
-            </tr>
-            <tr>
-                <th><abbr title="Debug Mode (show extra info)">Debug</abbr></th>
-                <td><input type="checkbox" id="ao-debug" /></span></td>
-            </tr>
-        </table>
-        <br>
-        <a class="btn" href="javascript:void(0);" onclick="menu.advancedOpts.reset();">Reset</a>
-        <a class="btn" href="javascript:void(0);" onclick="menu.advancedOpts.showPopup(false);">Close</a>
-    </div>
-    <div class="popup centre" id="popup-comment-box">
-        <textarea id="comment-box-text" rows="20" cols="80"></textarea>
-        <br><br>
-        <a class="btn" href="javascript:void(0);" onclick="menu.commentBox.close();">Close</a>
-    </div>
-    <div class="popup centre" id="popup-share">
-        <h2>Sharing Methods</h2>
-        <a href="javascript:void(0);" onclick="menu.share.image();" title="download.png">Download as Image</a><br>
-        <a href="javascript:void(0);" onclick="menu.share.file();" title="download.lgc">Downloas as File</a><a hidden="hidden" id='download-file-a' download="download.lgc"></a><br>
-        <a href="javascript:void(0);" onclick="menu.share.print();">Print</a><br>
-        <br>
-        <a class="btn" href="javascript:void(0);" onclick="menu.share.showPopup(false);">Close</a>
-    </div>
-    <div class="popup centre" id="popup-upload">
-        <h2>Upload File</h2>
-        <input type="file" id="upload-input" accept=".lgc" onchange="menu.uploadFile.upload();" />
-        <br><br>
-        <a class="btn" href="javascript:void(0);" onclick="menu.uploadFile.showPopup(false);">Close</a>
-    </div>
-    <div class="popup centre" id="popup-bool-algebra">
-        <h2>Boolean Algebra</h2>
-        <pre id='bool-algebra-text'></pre>
-        <br>
-        <a class="btn" href="javascript:void(0);" onclick="menu.boolAlgebra.popup(false);">Close</a>
-    </div>
-    <div class="popup centre" id="popup-trace-table">
-        <h2>Trace Table</h2>
-        <table id='trace-table' border='1'></table>
-        <br>
-        <a class="btn" href="javascript:void(0);" onclick="menu.traceTable.popup(false);">Close</a>
-    </div>
-
-    <!--
-    - ================= SCRIPTS ================= 
-    - External Entry Point: main.js @ main
-    - Internal Entry Point: src/p5_funcs.js @ setup()
-    -->
-
-    <script type="text/javascript" charset="utf-8" src="./src/app.js"></script>
-
-    <script type="text/javascript" charset="utf-8" src="./src/funcs.js"></script>
-    <script type="text/javascript" charset="utf-8" src="./src/workspace.js"></script>
-    
-    <script type="text/javascript" charset="utf-8" src="./src/classes/component.js"></script>
-    <script type="text/javascript" charset="utf-8" src="./src/classes/io.js"></script>
-    <script type="text/javascript" charset="utf-8" src="./src/classes/logic_gate.js"></script>
-    <script type="text/javascript" charset="utf-8" src="./src/classes/label.js"></script>
-    <script type="text/javascript" charset="utf-8" src="./src/classes/comment-box.js"></script>
-    
-    <script type="text/javascript" charset="utf-8" src="./src/socket.js"></script>
-    <script type="text/javascript" charset="utf-8" src="./src/menu.js"></script>
-    <script type="text/javascript" charset="utf-8" src="./src/p5_funcs.js"></script>
-    
-    <script type="text/javascript" charset="utf-8" src="./main.js"></script>
+        <script type="text/javascript" charset="utf-8" src="./src/funcs.js"></script>
+        <script type="text/javascript" charset="utf-8" src="./src/workspace.js"></script>
+        
+        <script type="text/javascript" charset="utf-8" src="./src/classes/component.js"></script>
+        <script type="text/javascript" charset="utf-8" src="./src/classes/io.js"></script>
+        <script type="text/javascript" charset="utf-8" src="./src/classes/logic_gate.js"></script>
+        <script type="text/javascript" charset="utf-8" src="./src/classes/utility.js"></script>
+        
+        <script type="text/javascript" charset="utf-8" src="./src/socket.js"></script>
+        <script type="text/javascript" charset="utf-8" src="./src/menu.js"></script>
+        <script type="text/javascript" charset="utf-8" src="./src/p5_funcs.js"></script>
+        
+        <script type="text/javascript" charset="utf-8" src="./main.js"></script>
+    </section>
 </body>
 </html>

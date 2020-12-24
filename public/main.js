@@ -1,4 +1,4 @@
 function main() {
-  menu.openFile.open({ name: 'xor' });
+  menu.openFile.open({ name: 'clock' });
   return 0;
 }

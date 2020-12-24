@@ -2,11 +2,12 @@
 
 - ~~Not-based logic gates: xnor, nor, nand~~ (20/12/2020, 21:48)
 - ~~Add buffer logic gate (a => a)~~ (22/12/2020, 08:15)
-- Add clock component
+- ~~Add clock component~~ (24/12/2020, 15:22)
 - ~~Save Input state~~ (20/12/2020, 19:56)
 - *n*-bit binary decoder (LCD display for 4-bit?)
 - ~~Label component~~ (20/12/2020, 21:05)
 - ~~Comment component~~ (22/12/2020, 13:58)
+- Chip/Integrated Circuit -> allow circuits to be exported into custom chips
 
 ## GUI
 
@@ -14,7 +15,7 @@
 - ~~Boolean Algebra representation of circuit~~ (23/12/2020, 15:03)
 - ~~Truth Table representation of circuit~~ (23/12/2020, 15:50)
 - ~~Advanced Options~~ (22/12/2020, 08:05)
-- Panable canvas (infinite size)
+- Panable canvas
 - Password for opening file - password-style input box
 
 ## Ease of Use

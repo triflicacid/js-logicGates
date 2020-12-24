@@ -203,6 +203,7 @@ div#statusbar>div {
     font-family: monospace;
 }
 
-textarea {
+textarea,
+input {
     outline: none !important;
 }

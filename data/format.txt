@@ -3,7 +3,7 @@
     "e": {
         "id", // Numerical ID of component
         "t", // Type of component (this.constructor.ID value)
-        "l", // Component label
+        "l", // Component label [OPTIONAL]
         "d", // Alternate data value for creation (e.g. logic gate type, label)
         "x", // X-coordinate
         "y" // Y-coordinate

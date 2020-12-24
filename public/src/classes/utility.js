@@ -62,10 +62,10 @@ class Label extends Component {
     } else if (event.keyCode == 16) { } else if (event.keyCode == 8) {
       // Backspace
       this._txt = this._txt.substr(0, this._txt.length - 1)
-    } else if (event.key.length == 1 && this._txt.length < Label.max) {
+    } else if (event.key.length == 1 && Label.validChars.indexOf(event.key) != -1 && this._txt.length < Label.max) {
       this._txt += event.key;
     } else {
-      Sounds.play("error");
+      playSound("error");
     }
   }
 
@@ -99,3 +99,31 @@ Label.selected = null;
 Label.ID = 3;
 Label.hoverInfo = false;
 Label.max = 15;
+Label.validChars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXY1234567890-_ !:';
+
+class CommentBox extends Component {
+  constructor(x, y) {
+    super(x, y);
+    this.w = this.h = 32;
+    this.text = '';
+  }
+
+  render() {
+    super.render(() => {
+      if (CommentBox.img) {
+        image(CommentBox.img, -this.w / 2, -this.h / 2);
+      }
+    });
+  }
+
+  event_click() {
+    menu.commentBox.open(this);
+  }
+
+  toObject() {
+    return { ...super.toObject(), d: btoa(this.text), };
+  }
+}
+
+CommentBox.ID = 4;
+CommentBox.hoverInfo = true;

@@ -47,19 +47,43 @@ const app = {
     optionsFile: document.getElementById('options-file'),
     cover: document.getElementsByClassName('cover')[0],
     nav: document.getElementById('nav'),
+    evalBtn: document.getElementById('btn-eval'),
   },
 
   init() {
     socket.init();
     CommentBox.img = loadImage('./img/comment.png');
+    Clock.imgOff = loadImage('./img/clock-wave-off.png');
+    Clock.imgOn = loadImage('./img/clock-wave-on.png');
     hide(this.html.canvasContainer, true);
     hide(this.html.optionsFile, true);
     hide(this.html.cover, true);
     hide(this.html.nav, true);
+    this.html.evalBtn.addEventListener('click', (ev) => {
+      app.workspace.isRunning ^= 1;
+      menu.renderEvalBtn();
+    });
     for (let el of document.getElementsByClassName('popup')) hide(el, true);
     document.body.addEventListener('click', this.stopInsert);
     menu.advancedOpts.init();
     this.statusbar.render();
+    menu.clockComponent.init();
+    initLogicGateData();
+
+    // Sounds
+    Sounds.create('click', './sound/click.mp3');
+    Sounds.create('error', './sound/error.mp3');
+    // Sounds.create('tick', './sound/tick.mp3');
+
+    // User-defined main function?
+    if (typeof window.main == 'function') this.tryCatchWrap(window.main);
+
+    // Open file via has in URI?
+    if (window.location.hash.length > 0) {
+      let name = window.location.hash.substr(1);
+      menu.openFile.open({ name });
+      window.location.hash = '';
+    }
   },
 
   /** Status bar things */
@@ -124,12 +148,11 @@ const app = {
           json = JSON.parse(this.file.data);
         } catch (e) {
           console.error(e);
-          this.message(`File ${this.file.name} is corrupted and cannot be opened\nError: ` + e.message, ERROR);
-          app.closeWorkspace();
-          return;
+          this.message(`File ${this.file.name} is corrupted and cannot be loaded\nError: ` + e.message, ERROR);
+          json = null;
         }
 
-        this.workspace = Workspace.fromObject(json);
+        this.workspace = json ? Workspace.fromObject(json) : new Workspace();
         this.statusbar.item('File', this.file.name);
       } else {
         app.workspace = new Workspace();
@@ -143,12 +166,14 @@ const app = {
       hide(this.html.nav, false);
       for (let el of document.getElementsByClassName('current-file')) el.innerText = this.file.name;
       menu.advancedOpts.update();
+      menu.renderEvalBtn();
     }
   },
 
   /** Close workspace */
   closeWorkspace() {
     if (this.workspace) {
+      this.workspace.terminate();
       this.workspace = null;
       hide(this.html.canvasContainer, true);
       hide(this.html.optionsNofile, false);
@@ -162,6 +187,8 @@ const app = {
       app.file.name = app.file.passwd = app.file.data = null;
       app.statusbar.removeItem('File');
       app.statusbar.removeItem('Up-To-Date');
+
+      menu.renderEvalBtn();
     }
   },
 
@@ -217,12 +244,12 @@ const app = {
 
     /** Press undo button */
     undoBtn() {
-      if (!this.undo()) Sounds.play('error');
+      if (!this.undo()) playSound('error');
     },
 
     /** Press undo button */
     redoBtn() {
-      if (!this.redo()) Sounds.play('error');
+      if (!this.redo()) playSound('error');
     },
   },
 
@@ -241,7 +268,7 @@ const app = {
         alert(msg);
         break;
       case 2:
-        Sounds.get("error").play(); // THis ensures the sound cannot be stacked
+        playSound('error');
         console.error('[ERROR] ' + msg);
         let title = typeof extra == 'string' ? extra : "Error";
         alert(`⚠ ${title} ⚠\n${msg}`);
@@ -291,12 +318,15 @@ const app = {
   stopInsert(x, y) {
     if (app.insertData && app.workspace) {
       if (x > 0 && x < width && y > 0 && y < height) {
-        if (app.opts.readonly) return readonlyMsg();
-        let c = Workspace.createComponent(...app.insertData, x, y);
-        if (c) {
-          app.workspace.addComponent(c);
-          if (c instanceof LabeledComponent) c.label = c.id.toString();
-          app.workspace.contentAltered = true;
+        if (app.opts.readonly) {
+          readonlyMsg();
+        } else {
+          let c = Workspace.createComponent(...app.insertData, x, y);
+          if (c) {
+            app.workspace.addComponent(c);
+            if (c instanceof LabeledComponent) c.label = c.id.toString();
+            app.workspace.contentAltered = true;
+          }
         }
         app.insertData = null;
         document.body.classList.remove('dragging');

@@ -70,7 +70,7 @@ Various options to share active circuit:
 
 *NB the download will have no file extension. When saved, append `.png` to the end of the name*
 
-### Advanced Options / Settings
+### Settings
 
 This will bring up several advanced options which subtly change appearence and quality of life. None of these options change the fundamental logic behind the circuit.
 
@@ -79,6 +79,14 @@ This will bring up several advanced options which subtly change appearence and q
 These two buttons will undo or redo the last action
 
 This can be accessed via the keyboard shortcuts `Ctrl + z` and `Ctrl + y`
+
+### Play / Pause
+
+Toggles the simulation... either reumes or pauses it
+
+If paused, all component evaluation and clocks are stopped
+
+This can be done via the keyboard shortcut `Space` (spacebar)
 
 ### Boolean Algebra
 
@@ -94,33 +102,51 @@ This can be accessed via the keyboard shortcut `t`
 
 # Components
 
-## Input
+## I/O
+
+*Input and Output*
+
+### Input
 
 Outputs a high (1) or a low (0) signal. Toggle this by clicking on the component.
 
-## Output
+### Clock
+
+This component switches between on/off (1/0, high/low) states after a specified duration (in milliseconds)
+
+A clocks' speed may be changed by clicking on it, which will bring up a prompt. Signal duration (ms) ranges between 100 - 9999.
+
+### Output
 
 Visually shows the signal it is recieving.
 
-## Logic Gate
+## Logic Gates
 
 There are 7 logic gates implemented: not, and, or, xor, nor, nand, xnor (see [Here](https://en.wikipedia.org/wiki/Logic_gate) for more)
 
 These components take its inputs, executes the logic function and outputs the return state
 
-## Labels
+## Utility
+
+These serve no purpose other than aiding the user
+
+### Labels
 
 Labels are used to describe a component.
 
-Click on a label and start typing, and press enter or click off the label to stop typing. *A label has a maximum length of 15 characters*
+Click on a label and start typing, and press enter or click off the label to stop typing.
 
-### Bound Labels
+Restrictions:
+- Limited character length
+- Limited characters allowed
+
+#### Bound Labels
 
 Some components (Input, Output) have a bound label. This acts as a label, but cannot be deleted nor moved, but moved with the component.
 
 The bound label acts as an identifier for the Input/Output, should the circuit be exported to an integrated circuit.
 
-## Comment
+### Comment
 
 The comment is able to hold an arbitrary length of text.
 
@@ -158,10 +184,15 @@ To view/edit the comment, click on the component to view a textarea.
 - Else, show boolean algebra for whole circuit
 
 `t`:
-- Open Trace Table popup
+Opens Trace Table popup for...
+- A logic gate, if hovering over a logic gate component;
+- Or for the entier circuit
 
 `Esc` (escape):
 - Attempts to exit/close the current workspace
+
+`Space` (space bar):
+- Toggles pause/play on the simulation
 
 # Building Circuits
 

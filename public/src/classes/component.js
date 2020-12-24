@@ -74,13 +74,16 @@ class Component {
         translate(this.x, this.y);
 
         noStroke();
+        fill(51);
         for (let obj of this.inputs) {
-            if (obj.h) fill(90, 90, 255); else fill(51);
-            circle(obj.x, obj.y, app.opts.cnodew);
+            // if (obj.h) fill(90, 90, 255); else fill(51);
+            let w = obj.h ? app.opts.cnodew * 1.5 : app.opts.cnodew;
+            circle(obj.x, obj.y, w);
         }
         for (let obj of this.outputs) {
-            if (obj.h) fill(90, 90, 255); else fill(51);
-            circle(obj.x, obj.y, app.opts.cnodew);
+            // if (obj.h) fill(90, 90, 255); else fill(51);
+            let w = obj.h ? app.opts.cnodew * 1.5 : app.opts.cnodew;
+            circle(obj.x, obj.y, w);
         }
 
         if (typeof fn == 'function') {
@@ -151,7 +154,9 @@ class Component {
         let cont = this.eval();
         if (cont === false) return;
         for (let output of this.outputs) {
-            for (let c of output.c) c.chain_eval();
+            for (let c of output.c) {
+                c.chain_eval();
+            }
         }
     }
 
