@@ -61,6 +61,10 @@ ol.inline>li {
     cursor: pointer;
 }
 
+.collapse-btn:hover {
+    cursor: pointer;
+}
+
 span#actionbar {
     font-style: italic;
     color: rgb(110, 106, 106);

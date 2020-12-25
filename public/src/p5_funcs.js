@@ -42,7 +42,7 @@ function mousePressed() {
         app.stopInsert(mouseX, mouseY);
         return;
     } else if (Label.selected) {
-        Label.selected.event_click();
+        Label.selected.event_mousedown();
     }
 
     if (!app.workspace) return;
@@ -50,6 +50,7 @@ function mousePressed() {
 
     if (app.workspace.componentOver) {
         if (!app.opts.readonly && app.workspace.componentOver.event_mstart()) {
+            app.workspace.componentOver.event_mousedown();
             app.history.push();
             app.workspace.componentDragging = true;
             app.workspace.componentBeenMoved = false;
@@ -131,9 +132,10 @@ function mouseDragged() {
 function mouseReleased() {
     if (!app.workspace || app.isFrozen || !isHidden(app.html.cover)) return;
 
+    if (app.workspace.componentOver) app.workspace.componentOver.event_mouseup(app.workspace.componentBeenMoved);
+
     // Clicked?
     if (app.workspace.componentOver && !app.workspace.componentBeenMoved) {
-        app.workspace.componentOver.event_click();
         if (app.workspace.componentOver instanceof Label) Label.selected = app.workspace.componentOver;
         app.workspace.componentDragging = false;
         app.history.registerChange(true);

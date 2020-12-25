@@ -303,11 +303,18 @@ class Workspace {
      */
     static createComponent(type, data, x, y) {
         switch (type) {
-            case Input.ID: {
-                let c = new Input(x, y);
+            case ToggleInput.ID: {
+                let c = new ToggleInput(x, y);
                 c.state = data;
                 return c;
             }
+            case ConstInput.ID: {
+                let c = new ConstInput(x, y);
+                c.state = data;
+                return c;
+            }
+            case PushInput.ID:
+                return new PushInput(x, y);
             case Output.ID:
                 return new Output(x, y);
             case LogicGate.ID:

@@ -68,6 +68,7 @@ const app = {
     menu.advancedOpts.init();
     this.statusbar.render();
     menu.clockComponent.init();
+    menu.sidebar.init();
     initLogicGateData();
 
     // Sounds

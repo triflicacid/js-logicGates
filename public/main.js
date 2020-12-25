@@ -1,4 +1,4 @@
 function main() {
-  menu.openFile.open({ name: 'clock' });
+  menu.openFile.open({ name: 'const' });
   return 0;
 }

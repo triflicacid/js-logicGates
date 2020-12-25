@@ -514,26 +514,30 @@ const menu = {
 
       // Array of inputs/outputs
       const components = Object.values(app.workspace._els);
-      const inputs = components.filter(c => c instanceof Input), outputs = components.filter(c => c instanceof Output);
+      const inputs = components.filter(c => c instanceof Input && c.constructor.isChangeable), outputs = components.filter(c => c instanceof Output);
 
-      // Record labels
-      data[0] = inputs.map(c => c.label).concat(outputs.map(c => c.label));
+      if (inputs.length > 0) {
+        // Record labels
+        data[0] = inputs.map(c => c.label).concat(outputs.map(c => c.label));
 
-      // Record original states
-      const originalStates = inputs.map(c => c.state);
+        // Record original states
+        const originalStates = inputs.map(c => c.state);
 
-      const inputStates = getCombos(inputs.length);
-      for (const states of inputStates) {
-        // Set states
-        for (let i = 0; i < states.length; i++) inputs[i].state = states[i];
-        app.workspace.evaluate();
+        const inputStates = getCombos(inputs.length);
+        for (const states of inputStates) {
+          // Set states
+          for (let i = 0; i < states.length; i++) inputs[i].state = states[i];
+          app.workspace.evaluate();
 
-        // Get output states
-        data.push(states.map(s => +s).concat(outputs.map(c => c.state)));
+          // Get output states
+          data.push(states.map(s => +s).concat(outputs.map(c => c.state)));
+        }
+
+        // Reset states
+        for (let i = 0; i < inputs.length; i++) inputs[i].state = originalStates[i];
+      } else {
+        data[0] = [];
       }
-
-      // Reset states
-      for (let i = 0; i < inputs.length; i++) inputs[i].state = originalStates[i];
 
       loop();
       return [data, inputs.length, outputs.length];
@@ -575,13 +579,53 @@ const menu = {
 
   /** Update display for evalBtn */
   renderEvalBtn() {
-    const btn = app.html.evalBtn;
-    if (app.workspace.isRunning) {
-      btn.innerHTML = '&#8214;';
-      btn.setAttribute('title', 'Pause Simulation');
-    } else {
-      btn.innerHTML = '&#9654;';
-      btn.setAttribute('title', 'Play Simulation');
+    if (app.workspace) {
+      const btn = app.html.evalBtn;
+      if (app.workspace.isRunning) {
+        btn.innerHTML = '&#8214;';
+        btn.setAttribute('title', 'Pause Simulation');
+      } else {
+        btn.innerHTML = '&#9654;';
+        btn.setAttribute('title', 'Play Simulation');
+      }
     }
+  },
+
+  /** Control for sidebar */
+  sidebar: {
+    btns: [],
+    divs: [],
+    plus: '&#10133;',
+    minus: '&#10134;',
+
+    init() {
+      for (const el of document.getElementsByClassName('collapse-btn')) {
+        let i = this.btns.push(el) - 1;
+        el.dataset.visible = 1;
+        this.divs.push(document.getElementById(el.dataset.control));
+        this.render(i);
+        el.addEventListener('click', (ev) => this.click(ev, i));
+      }
+    },
+
+    render(index) {
+      let btn = this.btns[index], src = this.divs[index];
+      if (btn.dataset.visible == 1) {
+        btn.innerHTML = this.minus;
+        btn.setAttribute('title', 'Click to collapse');
+        hide(src, false);
+      } else {
+        btn.innerHTML = this.plus;
+        btn.setAttribute('title', 'Click to expand');
+        hide(src, true);
+      }
+    },
+
+    /** Called by event listener */
+    click(event, arrayIndex) {
+      let btn = this.btns[arrayIndex];
+      btn.dataset.visible = btn.dataset.visible == "1" ? "0" : "1";
+      this.render(arrayIndex);
+    },
   },
 };

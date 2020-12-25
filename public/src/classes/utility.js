@@ -58,7 +58,7 @@ class Label extends Component {
   type(event) {
     if (event.keyCode == 13) {
       // Enter
-      this.event_click();
+      this.event_mouseup();
     } else if (event.keyCode == 16) { } else if (event.keyCode == 8) {
       // Backspace
       this._txt = this._txt.substr(0, this._txt.length - 1)
@@ -69,11 +69,13 @@ class Label extends Component {
     }
   }
 
-  event_click() {
-    this.typing = !this.typing;
-    Label.selected = this.typing ? this : null;
+  event_mouseup(beenMoved) {
+    if (!beenMoved) {
+      this.typing = !this.typing;
+      Label.selected = this.typing ? this : null;
 
-    if (!this.typing && this.linkedc && (typeof this._txt != 'string' || this._txt.length == 0)) this._txt = this.linkedc.id.toString();
+      if (!this.typing && this.linkedc && (typeof this._txt != 'string' || this._txt.length == 0)) this._txt = this.linkedc.id.toString();
+    }
   }
 
   event_delete() { return !this.linkedc; }
@@ -116,8 +118,10 @@ class CommentBox extends Component {
     });
   }
 
-  event_click() {
-    menu.commentBox.open(this);
+  event_mouseup(beenMoved) {
+    if (!beenMoved) {
+      menu.commentBox.open(this);
+    }
   }
 
   toObject() {

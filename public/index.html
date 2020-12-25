@@ -46,15 +46,22 @@
     <section data-topic="body">
         <div id="main" oncontextmenu="return false;">
             <div id="nav" class="noselect striped">
-                <span>I/O</span>
-                <div>
-                    <div onclick="app.startInsert(Input.ID);"><img src="img/input.png" /><br><span>Input</span></div>
+                <span>Inputs <span class='collapse-btn' data-control='menu-in'></span></span>
+                <div id='menu-in'>
+                    <div onclick="app.startInsert(ToggleInput.ID);"><img src="img/input.png" title="Clicking toggle the state" /><br><span>Toggle</span></div>
+                    <div onclick="app.startInsert(PushInput.ID);"><img src="img/input.png" title="Clicking changes state off->on->off" /><br><span>Push</span></div>
+                    <div onclick="app.startInsert(ConstInput.ID, 0);"><img src="img/const-input-off.png" title="Constant Low (Off)" /><br><span>Low</span></div>
+                    <div onclick="app.startInsert(ConstInput.ID, 1);"><img src="img/const-input-on.png" title="Constant High (On)" /><br><span>High</span></div>
                     <div onclick="app.startInsert(Clock.ID);"><img src="img/clock-wave.png" /><br><span>Clock</span></div>
+                </div>
+
+                <span>Outputs <span class='collapse-btn' data-control='menu-out'></span></span>
+                <div id='menu-out'>
                     <div onclick="app.startInsert(Output.ID);"><img src="img/output.png" /><br><span>Output</span></div>
                 </div>
 
-                <span>Logic Gates</span>
-                <div>
+                <span>Logic Gates <span class='collapse-btn' data-control='menu-lg'></span></span>
+                <div id='menu-lg'>
                     <div onclick="app.startInsert(LogicGate.ID, 0);"><img src="img/buffer.png" /><br><span>Buffer</span></div>
                     <div onclick="app.startInsert(LogicGate.ID, 1);"><img src="img/not.png" /><br><span>Not</span></div>
                     <div onclick="app.startInsert(LogicGate.ID, 2);"><img src="img/and.png" /><br><span>And</span></div>
@@ -65,8 +72,8 @@
                     <div onclick="app.startInsert(LogicGate.ID, 7);"><img src="img/xnor.png" /><br><span>Xnor</span></div>
                 </div>
 
-                <span>Utility</span>
-                <div>
+                <span>Utility <span class='collapse-btn' data-control='menu-util'></span></span>
+                <div id='menu-util'>
                     <div onclick="app.startInsert(Label.ID);"><img src="img/label.png" /><br><span>Label</span></div>
                     <div onclick="app.startInsert(CommentBox.ID);"><img src="img/comment.png" /><br><span>Comment</span></div>
                 </div>
@@ -219,7 +226,8 @@
         <script type="text/javascript" charset="utf-8" src="./src/workspace.js"></script>
         
         <script type="text/javascript" charset="utf-8" src="./src/classes/component.js"></script>
-        <script type="text/javascript" charset="utf-8" src="./src/classes/io.js"></script>
+        <script type="text/javascript" charset="utf-8" src="./src/classes/inputs.js"></script>
+        <script type="text/javascript" charset="utf-8" src="./src/classes/outputs.js"></script>
         <script type="text/javascript" charset="utf-8" src="./src/classes/logic_gate.js"></script>
         <script type="text/javascript" charset="utf-8" src="./src/classes/utility.js"></script>
         

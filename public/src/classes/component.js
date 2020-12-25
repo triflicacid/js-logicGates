@@ -180,9 +180,17 @@ class Component {
         return arr;
     }
 
-    /** Click event */
-    event_click() {
+    event_mousedown() { }
+
+    /** @param {boolean} beenMoved - Has this component been moved since event_mousedown has been called? */
+    event_mouseup(beenMoved = false) {
+        if (beenMoved) return;
         this.isHighlighted = !this.isHighlighted;
+    }
+
+    event_click() {
+        this.event_mousedown();
+        this.event_mouseup();
     }
 
     /** Permission to delete? */
