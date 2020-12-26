@@ -82,7 +82,7 @@ class Workspace {
         for (const id in this._els) this._els[id].render();
 
         // "Title" box over component...
-        if (this.componentOver && this.componentOver.constructor.hoverInfo && this.componentOverTicks > app.fps / 2) {
+        if (this.componentOver && this.componentOver.constructor.hoverInfo !== false && this.componentOverTicks > app.fps / 2) {
             textAlign(LEFT);
             const c = this.componentOver;
 
@@ -315,8 +315,6 @@ class Workspace {
             }
             case PushInput.ID:
                 return new PushInput(x, y);
-            case Output.ID:
-                return new Output(x, y);
             case LogicGate.ID:
                 return new LogicGate(LogicGate.types[data], x, y);
             case Label.ID: {
@@ -332,6 +330,15 @@ class Workspace {
             case Clock.ID: {
                 let c = new Clock(x, y);
                 if (typeof data === 'number') c.every = data;
+                return c;
+            }
+            case Output.ID:
+                return new Output(x, y);
+            case Output_4bit.ID:
+                return new Output_4bit(x, y);
+            case Output_Nbit.ID: {
+                let c = new Output_Nbit(x, y);
+                if (typeof data === "number") c.setInputs(data);
                 return c;
             }
             default:

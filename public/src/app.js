@@ -68,6 +68,7 @@ const app = {
     menu.advancedOpts.init();
     this.statusbar.render();
     menu.clockComponent.init();
+    menu.nBitOutput.init();
     menu.sidebar.init();
     initLogicGateData();
 
@@ -92,7 +93,7 @@ const app = {
     _: document.getElementById('statusbar'),
     items: [["File", "none"]],
     render() {
-      this._.innerHTML = '<div><a target="_blank" href="https://github.com/ruben4447/js-logicGates/blob/main/help.md">Help</a></div>';
+      this._.innerHTML = '<div><a target="_blank" href="/help">Help</a></div>';
       for (let item of this.items) {
         this._.insertAdjacentHTML('beforeend', `<div>${item[0]}: ${item[1]}</div>`);
       }
@@ -322,7 +323,7 @@ const app = {
         if (app.opts.readonly) {
           readonlyMsg();
         } else {
-          let c = Workspace.createComponent(...app.insertData, x, y);
+          let c = Workspace.createComponent(...app.insertData, roundCoord(x), roundCoord(y));
           if (c) {
             app.workspace.addComponent(c);
             if (c instanceof LabeledComponent) c.label = c.id.toString();

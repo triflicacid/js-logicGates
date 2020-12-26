@@ -26,6 +26,10 @@ Select a file by clicking on the button in the popup. File types must be `.lgc`.
 
 If successful, the file will be saved and opened as if it has been opened via `Open` button
 
+### Links
+
+Opens page in new tab containing usefule links
+
 ## When Active...
 
 ### Close
@@ -94,21 +98,31 @@ This will generate boolean algebraic expressions for all outputs
 
 This can be accessed via the keyboard shortcut `b`
 
-### Trace Table
+### Truth Table
 
-This will generate a trace table for the circuit (shows all possible states of the inputs, with the output states)
+This will generate a truth table for the circuit (shows all possible states of the inputs, with the output states)
 
 This can be accessed via the keyboard shortcut `t`
 
 # Components
 
-## I/O
+## Inputs
 
-*Input and Output*
+### Toggle Input
 
-### Input
+Outputs a high (1) or a low (0) signal. Clicking on this component toggles it's output state.
 
-Outputs a high (1) or a low (0) signal. Toggle this by clicking on the component.
+### Push Input
+
+Outputs a low (0) signal, unless component is pressed, in which case it will output a high (1) signal.
+
+### Low
+
+Outputs a constant low (0) signal
+
+### High
+
+Outputs a constant high (1) signal
 
 ### Clock
 
@@ -116,9 +130,23 @@ This component switches between on/off (1/0, high/low) states after a specified 
 
 A clocks' speed may be changed by clicking on it, which will bring up a prompt. Signal duration (ms) ranges between 100 - 9999.
 
+## Outputs
+
 ### Output
 
 Visually shows the signal it is recieving.
+
+### 4-bit output
+
+Takes 4 inputs and calculates binary number, working top-to-bottom (top node = 1, ...).
+
+Outputs as a single hexadecimal digit 0-15 => 0-F.
+
+### Arbitrary-bit output
+
+Takes in an arbitrary number of inputs (in a range) and converts to a decimal number, which is displayed, unlike 4-bit output, as a decimal number (0-9)
+
+To adjust input count, click on the component to bring up a popup.
 
 ## Logic Gates
 
@@ -181,6 +209,8 @@ To view/edit the comment, click on the component to view a textarea.
 
 `b`:
 - Over component: Show boolean algebra for that component
+- Over input node: Show boolean algebra for the component the connection is coming from
+- Over output node: Show boolean algebra for component who's node it is
 - Else, show boolean algebra for whole circuit
 
 `t`:

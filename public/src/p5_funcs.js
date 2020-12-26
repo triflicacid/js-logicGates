@@ -5,8 +5,8 @@ function setup() {
     app.init();
 
     frameRate(app.fps);
+    segment = new Segment(200, 200);
 }
-
 let lastChangeAlteredValue = true;
 function draw() {
     if (app.workspace) {
@@ -132,6 +132,13 @@ function mouseDragged() {
 function mouseReleased() {
     if (!app.workspace || app.isFrozen || !isHidden(app.html.cover)) return;
 
+    // Stop typing in label if over it, cancel other actions
+    if (Label.selected) {
+        Label.selected.event_mouseup();
+        Label.selected = null;
+        return;
+    }
+
     if (app.workspace.componentOver) app.workspace.componentOver.event_mouseup(app.workspace.componentBeenMoved);
 
     // Clicked?
@@ -156,7 +163,6 @@ function mouseReleased() {
             if (!app.workspace.connNodeOver[1] && !Array.isArray(conn.c)) {
                 // Is input connector, and not connected
                 if (conn.c == null) {
-                    console.log(app.workspace.connNodeOver[0], app.workspace.connNodeOver[2], over[0], over[2]);
                     app.workspace.connectComponents(app.workspace.connNodeOver[0], app.workspace.connNodeOver[2], over[0], over[2]);
                     ok = true;
                     app.workspace.stateChanged = true;
@@ -195,9 +201,9 @@ function keyPressed(event) {
             app.history.registerChange(true);
             return false;
         } else if (event.key == 'b') {
-            menu.boolAlgebra.popup(true, app.workspace.componentOver);
+            menu.boolAlgebra.popup(true, app.workspace.componentOver, app.workspace.connNodeOver);
         } else if (event.key == 't') {
-            menu.traceTable.popup(true, app.workspace.componentOver);
+            menu.truthTable.popup(true, app.workspace.componentOver);
         } else if (event.keyCode == 32) {
             app.html.evalBtn.click();
         } else if (event.ctrlKey) {

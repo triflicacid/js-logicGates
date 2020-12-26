@@ -335,6 +335,50 @@ const menu = {
     },
   },
 
+  /** Stuff for Output_Nbit */
+  nBitOutput: {
+    _: document.getElementById('popup-nbit'),
+    input: document.getElementById('popup-nbit-input'),
+    max: document.getElementById('popup-nbit-max'),
+    obj: null,
+
+    init() {
+      this.input.setAttribute('min', 1);
+      this.input.setAttribute('max', Output_Nbit.max);
+      this.input.addEventListener('change', this.update.bind(this));
+    },
+
+    open(obj) {
+      hide(this._, false);
+      hide(app.html.cover, false);
+      this.obj = obj;
+      this.input.value = obj.inputs.length;
+      this.max.innerText = obj.getMax();
+      if (app.opts.readonly) this.input.setAttribute('readonly', 'readonly');
+    },
+
+    /** Update obj and rendering */
+    update() {
+      let val = +this.input.value;
+      if (isNaN(val)) val = this.obj.every;
+      else if (val < 1) val = 1;
+      else if (val > Output_Nbit.max) val = Output_Nbit.max;
+      this.input.value = val;
+      this.max.innerText = Math.pow(2, val) - 1;
+    },
+
+    close() {
+      hide(this._, true);
+      hide(app.html.cover, true);
+      this.max.innertext = '';
+      this.obj.setInputs(+this.input.value);
+      this.input.value = '';
+      this.obj.event_click();
+      this.obj = null;
+      this.input.removeAttribute('readonly');
+    },
+  },
+
   /** Download canvas as image */
   downloadImage() {
     let image = app.p5canvas.elt.toDataURL("image/png").replace("image/png", "image/octet-stream");
@@ -419,12 +463,22 @@ const menu = {
     /**
      * @param {boolean} show - Show popup?
      * @param {Component | undefined} obj - Which component to who algebra for?
+     * @param {any[] | undefined} conn - Which connection node are we over?
      */
-    popup(show, obj = undefined) {
+    popup(show, obj = undefined, conn = undefined) {
       hide(app.html.cover, !show);
       hide(this._, !show);
 
       if (show) {
+        if (Array.isArray(conn)) {
+          if (conn[1]) {
+            // Is input node... Backtrace component that is output of conn
+            obj = app.workspace._els[conn[0]].inputs[conn[2]].c;
+          } else {
+            obj = app.workspace._els[conn[0]];
+          }
+        }
+
         this.data = obj ? this.write(obj) : this.writeAll();
         this.target.innerHTML = Array.isArray(this.data) ? this.data.join('<br>') : this.data;
       } else {
@@ -461,7 +515,7 @@ const menu = {
     },
   },
 
-  traceTable: {
+  truthTable: {
     _: document.getElementById('popup-trace-table'),
     table: document.getElementById('trace-table'),
     title: document.getElementById('trace-table-title'),
@@ -572,7 +626,7 @@ const menu = {
     /** Download this.data as CSV */
     download() {
       const text = this.toCSV();
-      const fname = (this.title.innerText + ' trace table.csv').toLowerCase().split(' ').join('-');
+      const fname = (this.title.innerText + ' truth table.csv').toLowerCase().split(' ').join('-');
       downloadTextFile(text, fname);
     },
   },

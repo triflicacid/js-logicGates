@@ -64,7 +64,7 @@ class ToggleInput extends Input {
 }
 
 ToggleInput.ID = 0;
-ToggleInput.isChangeable = true;
+ToggleInput.isChanable = true;
 ToggleInput.hoverInfo = true;
 
 class PushInput extends Input {

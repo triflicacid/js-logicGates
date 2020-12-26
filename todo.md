@@ -4,12 +4,12 @@
 - ~~Add buffer logic gate (a => a)~~ (22/12/2020, 08:15)
 - ~~Add clock component~~ (24/12/2020, 15:22)
 - ~~Save Input state~~ (20/12/2020, 19:56)
-- *n*-bit binary decoder (LCD display for 4-bit?)
+- ~~*n*-bit binary decoder (LCD display for 4-bit?)~~ (26/12/2020, 08:56)
 - ~~Label component~~ (20/12/2020, 21:05)
 - ~~Comment component~~ (22/12/2020, 13:58)
 - Chip/Integrated Circuit -> allow circuits to be exported into custom chips
-- Push-button
-- Constant high/low emitter
+- ~~Push-button~~ (24/12/2020, 20:18)
+- ~~Constant high/low emitter~~ (24/12/2020, 20:37)
 
 ## GUI
 

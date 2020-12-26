@@ -38,7 +38,7 @@
                 <a class="btn" href="javascript:void(0);" onclick="app.history.redoBtn();" title="Redo">&#8635;</a>
                 <a class="btn" href="javascript:void(0);" id='btn-eval'></a>
                 <a class="btn" href="javascript:void(0);" onclick="menu.boolAlgebra.popup(true);" title="Boolean Algebra">&#402;</a>
-                <a class="btn" href="javascript:void(0);" onclick="menu.traceTable.popup(true);" title="Trace Table"><img src="img/table.png" /></a>
+                <a class="btn" href="javascript:void(0);" onclick="menu.truthTable.popup(true);" title="Truth Table"><img src="img/table.png" /></a>
             </div>
         </div>
     </section>
@@ -58,6 +58,8 @@
                 <span>Outputs <span class='collapse-btn' data-control='menu-out'></span></span>
                 <div id='menu-out'>
                     <div onclick="app.startInsert(Output.ID);"><img src="img/output.png" /><br><span>Output</span></div>
+                    <div onclick="app.startInsert(Output_4bit.ID);"><img src="img/4-bit-output.png" title="4-bit display" /><br><span>4-bit</span></div>
+                    <div onclick="app.startInsert(Output_Nbit.ID);"><img src="img/n-bit-output.png" title="Arbitrary-bit display" /><br><span>&Nscr;-bit</span></div>
                 </div>
 
                 <span>Logic Gates <span class='collapse-btn' data-control='menu-lg'></span></span>
@@ -202,9 +204,9 @@
             <h2 id='trace-table-title'>Trace Table</h2>
             <table id='trace-table' class="centre" border='1'></table>
             <br>
-            <a href="javascript:void(0);" onclick="menu.traceTable.download();" title="Download as CSV file">Download</a>
+            <a href="javascript:void(0);" onclick="menu.truthTable.download();" title="Download as CSV file">Download</a>
             <br><br>
-            <a class="btn" href="javascript:void(0);" onclick="menu.traceTable.popup(false);">Close</a>
+            <a class="btn" href="javascript:void(0);" onclick="menu.truthTable.popup(false);">Close</a>
         </div>
         <div class="popup centre" id="popup-clock">
             <h2>Clock</h2>
@@ -212,6 +214,13 @@
             <p>Speed: <span id='popup-clock-speed'></span> Hz</p>
             <br>
             <a class="btn" href="javascript:void(0);" onclick="menu.clockComponent.close();">Close</a>
+        </div>
+        <div class="popup centre" id="popup-nbit">
+            <h2>&Nscr;-Bit Output</h2>
+            <p>Inputs <input type='number' step='1' id='popup-nbit-input' /></p>
+            <p>Max Number: <span id='popup-nbit-max'></span></p>
+            <br>
+            <a class="btn" href="javascript:void(0);" onclick="menu.nBitOutput.close();">Close</a>
         </div>
     </section>
 
@@ -221,6 +230,7 @@
         - Internal Entry Point: src/p5_funcs.js @ setup()
         -->
         <script type="text/javascript" charset="utf-8" src="./src/app.js"></script>
+        <script type="text/javascript" charset="utf-8" src="./src/segment_display.js"></script>
 
         <script type="text/javascript" charset="utf-8" src="./src/funcs.js"></script>
         <script type="text/javascript" charset="utf-8" src="./src/workspace.js"></script>
