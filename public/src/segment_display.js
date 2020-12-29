@@ -84,14 +84,6 @@ class Segment {
         }
     }
 
-    boundingBox() {
-        stroke(0);
-        strokeWeight(1);
-        noFill();
-        rect(this.x, this.y, this.width, this.height);
-        return this;
-    }
-
     static getNum(i) {
         i = i % SEGMENT_ENCODED_NUMS.length;
         return SEGMENT_ENCODED_NUMS[i];

@@ -1,9 +1,8 @@
 const express = require('express');
 const socketio = require('socket.io');
-const fs = require('fs');
 
 const Connection = require('./connection.js');
-const DataFile = require('./data_file.js');
+const CircuitFile = require('./circuit_file.js');
 
 const PORT = 3000;
 
@@ -13,6 +12,6 @@ const io = socketio(server);
 
 app.use(express.static("public/"));
 
-DataFile.loadFiles();
+CircuitFile.loadFiles();
 
 io.on('connection', (socket) => new Connection(socket));

@@ -41,13 +41,8 @@ const menu = {
           file.passwd == undefined ?
             window.prompt(`File ${file.name} is protected. Enter password to open.`) : null
           : file.passwd;
-        socket.getFile.request(file.name, passwd, data => {
-          app.file.open = true;
-          app.file.name = data.name;
-          app.file.data = data.data;
-          app.file.passwd = passwd;
-          app.openWorkspace();
-        });
+        app.file.passwd = passwd;
+        socket.getFile.request(file.name, passwd);
       }
     },
   },
@@ -340,12 +335,13 @@ const menu = {
     _: document.getElementById('popup-nbit'),
     input: document.getElementById('popup-nbit-input'),
     max: document.getElementById('popup-nbit-max'),
+    span: document.getElementById('popup-nbit-span'),
     obj: null,
 
     init() {
       this.input.setAttribute('min', 1);
       this.input.setAttribute('max', Output_Nbit.max);
-      this.input.addEventListener('change', this.update.bind(this));
+      this.input.addEventListener('input', this.update.bind(this));
     },
 
     open(obj) {
@@ -354,6 +350,7 @@ const menu = {
       this.obj = obj;
       this.input.value = obj.inputs.length;
       this.max.innerText = obj.getMax();
+      this.span.innerText = obj.inputs.length;
       if (app.opts.readonly) this.input.setAttribute('readonly', 'readonly');
     },
 
@@ -364,13 +361,14 @@ const menu = {
       else if (val < 1) val = 1;
       else if (val > Output_Nbit.max) val = Output_Nbit.max;
       this.input.value = val;
+      this.span.innerText = val;
       this.max.innerText = Math.pow(2, val) - 1;
     },
 
     close() {
       hide(this._, true);
       hide(app.html.cover, true);
-      this.max.innertext = '';
+      this.max.innerText = this.span.innerText = '';
       this.obj.setInputs(+this.input.value);
       this.input.value = '';
       this.obj.event_click();
@@ -424,28 +422,48 @@ const menu = {
   uploadFile: {
     _: document.getElementById('popup-upload'),
     input: document.getElementById('upload-input'),
+    ext: null,
 
-    showPopup(show) {
+    showPopup(show, ext = null) {
       hide(app.html.cover, !show);
       hide(this._, !show);
+      this.ext = ext;
+      if (show) this.input.setAttribute('accept', '.' + ext);
     },
 
     upload() {
       if (this.input.files.length == 1) {
         let file = this.input.files[0];
-        let name = file.name;
-        if (name.substr(name.length - 4, 4) != '.lgc') return app.message('File must be .lgc', ERROR);
-        name = name.substring(0, name.length - 4);
+        this.input.value = '';
+        let name = file.name, ext = '.' + this.ext;
+        if (name.substr(name.length - ext.length, ext.length) != ext) return app.message('File must be ' + ext, ERROR);
+        name = name.substring(0, name.length - ext.length);
 
         let freader = new FileReader();
         freader.onload = event => {
           this.showPopup(false);
-          const data = atob(event.target.result);
-          menu.saveAs.openAfter = true;
-          app.file.open = false;
-          app.file.name = name;
-          app.file.data = data;
-          socket.newFile.request(name, null, data);
+          if (ext == '.lgc') {
+            const data = atob(event.target.result);
+            menu.saveAs.openAfter = true;
+            app.file.open = false;
+            app.file.name = name;
+            app.file.data = data;
+            socket.newFile.request(name, null, data);
+          } else if (ext == '.lgchip') {
+            let data;
+            try {
+              data = JSON.parse(atob(event.target.result));
+            } catch (e) {
+              return app.message(`Corrupted LGCHIP file\nError: ${e.message}`, ERROR, "Corrupt File");
+            }
+
+            if (app.workspace.chips.findIndex(c => c.name == data.name) !== -1) return app.message(`Chip named '${data.name}' already exists`, ERROR);
+
+            app.addChip(data);
+            app.message(`Uploaded chip '${data.name}'. Expand the 'Chips' section in the menu on the left to view your chips.`, INFO);
+          } else {
+            app.message(`Invalid file extension ${ext}`, ERROR);
+          }
         };
         freader.readAsBinaryString(file);
       } else {
@@ -470,16 +488,19 @@ const menu = {
       hide(this._, !show);
 
       if (show) {
-        if (Array.isArray(conn)) {
+        if (obj) {
+          this.data = this.write(obj);
+        } else if (Array.isArray(conn)) {
           if (conn[1]) {
             // Is input node... Backtrace component that is output of conn
-            obj = app.workspace._els[conn[0]].inputs[conn[2]].c;
+            this.data = this.write(app.workspace._els[conn[0]].inputs[conn[2]].c);
           } else {
-            obj = app.workspace._els[conn[0]];
+            this.data = this.write(app.workspace._els[conn[0]], conn[2]);
           }
+        } else {
+          this.data = this.writeAll();
         }
 
-        this.data = obj ? this.write(obj) : this.writeAll();
         this.target.innerHTML = Array.isArray(this.data) ? this.data.join('<br>') : this.data;
       } else {
         this.target.innerHTML = '';
@@ -487,14 +508,10 @@ const menu = {
     },
 
     /** Populate textarea with algebra for provided component */
-    write(c) {
-      let algebra = c.backtrace();
-      let subbed = c.backtrace(true);
-      while (algebra[0] == '(' && algebra[algebra.length - 1] == ')') {
-        algebra = algebra.substr(1, algebra.length - 2);
-        subbed = subbed.substr(1, subbed.length - 2);
-      }
-      let line = algebra + ' = ' + subbed + ' = ' + c.state;
+    write(c, outputNodeIndex = 0) {
+      const algebra = c.backtrace(outputNodeIndex, false);
+      const subbed = c.backtrace(outputNodeIndex, true);
+      let line = algebra + ' = ' + subbed + ' = ' + (c.outputs.length == 0 ? c.getInputState(0) : c.getState(0));
       return line;
     },
 
@@ -580,15 +597,15 @@ const menu = {
         const inputStates = getCombos(inputs.length);
         for (const states of inputStates) {
           // Set states
-          for (let i = 0; i < states.length; i++) inputs[i].state = states[i];
+          for (let i = 0; i < states.length; i++) inputs[i].setState(0, states[i]);
           app.workspace.evaluate();
 
           // Get output states
-          data.push(states.map(s => +s).concat(outputs.map(c => c.state)));
+          data.push(states.map(s => +s).concat(outputs.map(c => c.getInputState(0))));
         }
 
         // Reset states
-        for (let i = 0; i < inputs.length; i++) inputs[i].state = originalStates[i];
+        for (let i = 0; i < inputs.length; i++) inputs[i].setState(0, originalStates[i]);
       } else {
         data[0] = [];
       }
@@ -651,11 +668,11 @@ const menu = {
     divs: [],
     plus: '&#10133;',
     minus: '&#10134;',
+    menu_chips: document.getElementById('menu-chips'),
 
     init() {
       for (const el of document.getElementsByClassName('collapse-btn')) {
         let i = this.btns.push(el) - 1;
-        el.dataset.visible = 1;
         this.divs.push(document.getElementById(el.dataset.control));
         this.render(i);
         el.addEventListener('click', (ev) => this.click(ev, i));
@@ -681,5 +698,100 @@ const menu = {
       btn.dataset.visible = btn.dataset.visible == "1" ? "0" : "1";
       this.render(arrayIndex);
     },
+
+    updateChips() {
+      this.menu_chips.innerHTML = '';
+      for (let i = 0; i < app.workspace.chips.length; i++) {
+        const chip = app.workspace.chips[i];
+        const onclick1 = `app.startInsert(${Chip.ID}, ${i});`;
+        const onclick2 = `menu.saveChip(app.workspace.chips[${i}]);`;
+        this.menu_chips.innerHTML += `<div onclick="${onclick1}"><img src='img/chip.png' /><br><span>${chip.name} <a class="btn" onclick="${onclick2}">&#128427;</a></span></div>`;
+      }
+      this.menu_chips.innerHTML += '<div onclick="menu.uploadFile.showPopup(true, \'lgchip\');"><a href="javascript:void(0);" class="btn">Upload Chip</a></div>';
+    }
+  },
+
+  export: {
+    _: document.getElementById('popup-export'),
+    inputName: document.getElementById('popup-export-name'),
+
+    showPopup(show) {
+      show = show && this.validate();
+      hide(this._, !show);
+      hide(app.html.cover, !show);
+      if (show) this.inputName.focus();
+    },
+
+    /** Validate that app.workspace is suitable for export */
+    validate() {
+      const etitle = "Cannot Export";
+      let ok = true;
+
+      // Check for invalid components / duplicate labels
+      const labels = [];
+      let foundInput = false, foundOutput = false;
+      app.workspace.forEachComponent(c => {
+        if (c.constructor.name == "Clock" || c.constructor.name == "Output_4bit" || c.constructor.name == "Output_Nbit") {
+          app.message(`Component ${c.name} cannot be present in a chip`, ERROR, etitle);
+          ok = false;
+          return false;
+        }
+
+        if (c instanceof LabeledComponent) {
+          if (labels.indexOf(c.label) == -1) {
+            labels.push(c.label);
+          } else {
+            ok = false;
+            app.message(`Duplicate label ${c.label} (on ${c.name})`, ERROR, etitle);
+            return false;
+          }
+        }
+
+        if (!foundInput && c instanceof Input) foundInput = true;
+        else if (!foundOutput && c instanceof Output) foundOutput = true;
+      });
+
+      if (!ok) return false;
+      if (!foundInput) {
+        app.message(`Chip must have at least one input`, ERROR, etitle);
+        return false;
+      }
+      if (!foundOutput) {
+        app.message(`Chip must have at least one output`, ERROR, etitle);
+        return false;
+      }
+      return true;
+    },
+
+    export() {
+      let name = this.inputName.value;
+      if (name.length == 0) return app.message('Name is required', ERROR);
+      let regex = /[^A-Za-z\s\-_0-9]/g;
+      if (name.match(regex) != null) return app.message(`Name of chip must not match ${regex}`, ERROR);
+      if (app.workspace.chips.findIndex(x => x.name == name) !== -1) return app.message(`Chip called '${name}' already exists`, ERROR);
+
+      const components = Object.values(app.workspace._els);
+      const inputs = components.filter(c => c instanceof Input && !(c instanceof Clock));
+      const outputs = components.filter(c => c instanceof Output);
+
+      let data = {
+        name,
+        in: inputs.map(c => c.label),
+        out: outputs.map(c => c.label),
+        fns: outputs.map(c => c.backtraceJS()),
+      };
+      app.workspace.chips.push(data);
+      menu.sidebar.updateChips();
+
+      this.showPopup(false);
+      app.message('Created chip ' + name, INFO);
+    },
+  },
+
+  /** Save a Chip component */
+  saveChip(chip) {
+    let data = chip instanceof Chip ? chip.toObject().d : chip;
+    data = JSON.stringify(data);
+    downloadTextFile(btoa(data), chip.name + ".lgchip");
   },
 };

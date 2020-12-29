@@ -1,4 +1,4 @@
-const DataFile = require("./data_file");
+const CircuitFile = require("./circuit_file.js");
 
 class Connection {
   constructor(socket) {
@@ -9,14 +9,14 @@ class Connection {
   }
 
   _init() {
-    console.log(`New Connection: ID ${this._.id}`);
+    console.log(`New Connection: ${this._.id}`);
     this.message(`Connected... ID = ${this._.id}`);
 
     // Request for list of files
     this._.on('request-file-list', () => {
       let arr = [];
-      for (let fname in DataFile.files) {
-        let file = DataFile.files[fname];
+      for (let fname in CircuitFile.files) {
+        let file = CircuitFile.files[fname];
         let stats = file.getStats();
         arr.push({ name: fname, protected: file.isProtected(), size: stats.size });
       }
@@ -25,22 +25,22 @@ class Connection {
 
     // Request to get file contents
     this._.on('get-file', data => {
-      if (DataFile.files.hasOwnProperty(data.file)) {
-        let file = DataFile.files[data.file];
+      if (CircuitFile.files.hasOwnProperty(data.file)) {
+        let file = CircuitFile.files[data.file];
         if (file.isProtected() && file.getPassword() != data.passwd) {
-          this.message(`Password for protected file ${data.file} is incorrect`, 2);
+          return this.message(`Password for protected file '${data.file}' is incorrect`, 2);
         } else {
-          this._.emit('file-data', { name: data.file, data: file.getData() });
+          this._.emit('file-data', { type: data.type, name: data.file, data: file.getData() });
         }
       } else {
-        this.message(`File ${data.file} does not exist`, 2);
+        return this.message(`Circuit '${data.file}' does not exist`, 2);
       }
     });
 
     // Request to write to file
     this._.on('write-file', data => {
-      if (DataFile.files.hasOwnProperty(data.file)) {
-        let file = DataFile.files[data.file];
+      if (CircuitFile.files.hasOwnProperty(data.file)) {
+        let file = CircuitFile.files[data.file];
         if (file.isProtected() && file.getPassword() != data.passwd) {
           this.message(`Password for protected file ${data.file} is incorrect`, 2);
         } else {
@@ -54,24 +54,24 @@ class Connection {
 
     // Request to create a file
     this._.on('create-file', data => {
-      if (DataFile.files.hasOwnProperty(data.name)) {
-        this.message(`File ${data.name} already exists`, 2);
+      if (CircuitFile.files.hasOwnProperty(data.name)) {
+        return this.message(`File ${data.name} already exists`, 2);
       } else if (typeof data.name != 'string' || data.name.length == 0) {
-        this.message(`File name must be provided`, 2);
-      } else if (data.name.match(DataFile.nameRegex)) {
-        this.message(`File name must not match ${DataFile.nameRegex}`, 2);
+        return this.message(`File name must be provided`, 2);
+      } else if (data.name.match(CircuitFile.nameRegex)) {
+        return this.message(`File name must not match ${CircuitFile.nameRegex}`, 2);
       } else {
         if (typeof data.passwd != 'string' || data.passwd.length == 0) data.passwd = null;
-        let obj = DataFile.create(data.name, data.passwd);
+        let obj = CircuitFile.create(data.name, data.passwd);
         if (data.data) obj.writeData(data.data); // Write data to file if provided
-        this._.emit('created-file', obj.name);
+        this._.emit('created-file', { type: data.type, name: obj.name });
       }
     });
 
     // Delete file
     this._.on('delete-file', data => {
-      if (DataFile.files.hasOwnProperty(data.file)) {
-        let file = DataFile.files[data.file];
+      if (CircuitFile.files.hasOwnProperty(data.file)) {
+        let file = CircuitFile.files[data.file];
         if (file.isProtected() && file.getPassword() != data.passwd) {
           this.message(`Password for protected file ${data.file} is incorrect`, 2);
         } else {

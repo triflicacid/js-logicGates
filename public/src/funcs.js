@@ -40,6 +40,7 @@ const createOutputConnObj = (x, y) => ({
     c: [], // Array of connected components
     ci: [], // Array of associated conn indexes (matches to this.c array)
     h: false, // Is highlighted
+    s: 0, // State of node
 });
 
 /** Generate algebra table

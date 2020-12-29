@@ -5,7 +5,9 @@ class Input extends LabeledComponent {
   }
 
   /** Toggle state of Input */
-  toggle() { this.state ^= 1; }
+  toggle() {
+    this.setState(0, this.getState(0) ^ 1);
+  }
 
   /**
    * @param {Function} fn - Optional callback
@@ -20,7 +22,7 @@ class Input extends LabeledComponent {
       if (typeof fn == 'function') {
         fn();
       } else {
-        fill(...app.opts['colour' + this.state]);
+        fill(...app.opts['colour' + this.getState(0)]);
         let pad = this.w / 6;
         noStroke();
         rect(-this.w / 2 + pad, -this.h / 2 + pad, this.w - 2 * pad, this.h - 2 * pad, roundness);
@@ -28,7 +30,7 @@ class Input extends LabeledComponent {
         textAlign(CENTER, CENTER);
         fill(200);
         textSize(13);
-        text(this.state == 1 ? "On" : "Off", 0, 0);
+        text(this.getState(0) ? "On" : "Off", 0, 0);
       }
     });
   }
@@ -39,9 +41,12 @@ class Input extends LabeledComponent {
   eval() { }
 
   /** @override */
-  backtrace(subin) {
-    return subin ? this.state : this.label;
+  backtrace(out, subin) {
+    return subin ? this.getState(0) : this.label;
   }
+
+  /** @override */
+  backtraceJS(out) { return "\"" + this.label + "\""; }
 }
 
 class ToggleInput extends Input {
@@ -58,13 +63,13 @@ class ToggleInput extends Input {
 
   toObject() {
     let obj = super.toObject();
-    if (obj.d == undefined && this.state == 1) obj.d = 1;
+    if (obj.d == undefined && this.getState(0) == 1) obj.d = 1;
     return obj;
   }
 }
 
 ToggleInput.ID = 0;
-ToggleInput.isChanable = true;
+ToggleInput.isChangeable = true;
 ToggleInput.hoverInfo = true;
 
 class PushInput extends Input {
@@ -77,10 +82,10 @@ class PushInput extends Input {
   }
 
   event_mousedown() {
-    this.state = 1;
+    this.setState(0, 1);
   }
   event_mouseup() {
-    this.state = 0;
+    this.setState(0, 0);
   }
 }
 
@@ -101,15 +106,13 @@ class Clock extends Input {
   set every(v) {
     if (typeof v == 'number' && !isNaN(v)) {
       this._every = v;
-      // this.stop();
-      // this.start();
     }
   }
 
   start() {
     if (this._interval) this.stop();
     this._interval = setInterval(() => {
-      this.state ^= 1;
+      this.setState(0, this.getState(0) ^ 1);
       // playSound('tick');
     }, this.every);
   }
@@ -125,7 +128,7 @@ class Clock extends Input {
 
   render() {
     super.render(() => {
-      let img = 'img' + (this.state ? "On" : "Off");
+      let img = 'img' + (this.getState(0) ? "On" : "Off");
       if (Clock[img]) {
         let s = 2.5;
         let w = 17 * s;
@@ -174,23 +177,28 @@ Clock.isChangeable = true;
 Clock.ID = 5;
 
 class ConstInput extends Input {
-  constructor(x, y, label) {
+  constructor(x, y, state, label) {
     super(x, y, label);
+    this.setState(0, state ? 1 : 0);
   }
 
   render() {
     super.render(() => {
       noStroke();
-      fill(...app.opts['colour' + this.state]);
+      fill(...app.opts['colour' + this.getState(0)]);
       textSize(35);
       textAlign(CENTER, CENTER);
-      text(this.state, 0, 0);
+      text(this.getState(0), 0, 0);
     }, 0);
   }
 
+  backtrace() { return this.getState(0); }
+
+  backtraceJS() { return this.getState(0); }
+
   toObject() {
     let obj = super.toObject();
-    obj.d = this.state;
+    obj.d = this.getState(0);
     return obj;
   }
 }

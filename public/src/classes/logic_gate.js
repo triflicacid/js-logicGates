@@ -20,19 +20,15 @@ class LogicGate extends Component {
     get name() { return capitalise(this._type) + " Gate"; }
 
     /**
-     * Get text representation of logic gates
-     */
-
-    /**
      * Update component state
      */
     eval() {
         const a = this.getInputState(0);
         if (this.inputs.length == 1) {
-            this.state = LogicGate.data[this._type].fn(a) ? 1 : 0;
+            this.setState(0, LogicGate.data[this._type].fn(a));
         } else {
             const b = this.getInputState(1);
-            this.state = LogicGate.data[this._type].fn(a, b) ? 1 : 0;
+            this.setState(0, LogicGate.data[this._type].fn(a, b));
         }
     }
 
@@ -60,23 +56,34 @@ class LogicGate extends Component {
         let args = [this.getInputState(0)];
         if (this.inputs.length != 1) args.push(this.getInputState(1));
 
-        arr.push(LogicGate.data[this._type].txt(...args) + ' = ' + this.state);
+        arr.push(LogicGate.data[this._type].txt(...args) + ' = ' + this.getState(0));
         return arr;
     }
 
     /** @override */
-    backtrace(subin) {
+    backtrace(out, subin) {
         const unknown = subin ? '0' : '?';
 
         let str;
-        const a = this.inputs[0].c ? this.inputs[0].c.backtrace(subin) : unknown;
+        const a = this.inputs[0].c ? this.inputs[0].c.backtrace(this.inputs[0].ci, subin) : unknown;
         if (this.inputs.length == 1) {
             str = LogicGate.data[this._type].txt(a);
         } else {
-            const b = this.inputs[1].c ? this.inputs[1].c.backtrace(subin) : unknown;
+            const b = this.inputs[1].c ? this.inputs[1].c.backtrace(this.inputs[1].ci, subin) : unknown;
             str = LogicGate.data[this._type].txt(a, b);
         }
         return "(" + str + ")";
+    }
+
+    /** @override */
+    backtraceJS(out) {
+        const a = this.inputs[0].c ? this.inputs[0].c.backtraceJS(this.inputs[0].ci) : '0';
+        if (this.inputs.length == 1) {
+            return `${this._type}(${a})`;
+        } else {
+            const b = this.inputs[1].c ? this.inputs[1].c.backtraceJS(this.inputs[1].ci) : '0';
+            return `${this._type}(${a},${b})`;
+        }
     }
 
     toObject() {

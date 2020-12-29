@@ -7,7 +7,7 @@
 - ~~*n*-bit binary decoder (LCD display for 4-bit?)~~ (26/12/2020, 08:56)
 - ~~Label component~~ (20/12/2020, 21:05)
 - ~~Comment component~~ (22/12/2020, 13:58)
-- Chip/Integrated Circuit -> allow circuits to be exported into custom chips
+- ~~Chip/Integrated Circuit -> allow circuits to be exported into custom chips~~ (29/12/2020)
 - ~~Push-button~~ (24/12/2020, 20:18)
 - ~~Constant high/low emitter~~ (24/12/2020, 20:37)
 

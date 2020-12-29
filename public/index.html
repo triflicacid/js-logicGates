@@ -21,7 +21,7 @@
             <div id="options-nofile">
                 <a class="btn" href="javascript:void(0);" onclick="menu.openFile.showPopup(true);" title="Open File">&#128449; Open</a>
                 <a class="btn" href="javascript:void(0);" onclick="app.openWorkspace();" title="Create New Workspace">&#65291; New</a>
-                <a class="btn" href="javascript:void(0);" onclick="menu.uploadFile.showPopup(true);" title="Upload Circuit File">&#9650; Upload</a>
+                <a class="btn" href="javascript:void(0);" onclick="menu.uploadFile.showPopup(true, 'lgc');" title="Upload Circuit File">&#9650; Upload</a>
             </div>
 
             <div id="options-file">
@@ -39,6 +39,7 @@
                 <a class="btn" href="javascript:void(0);" id='btn-eval'></a>
                 <a class="btn" href="javascript:void(0);" onclick="menu.boolAlgebra.popup(true);" title="Boolean Algebra">&#402;</a>
                 <a class="btn" href="javascript:void(0);" onclick="menu.truthTable.popup(true);" title="Truth Table"><img src="img/table.png" /></a>
+                <a class="btn" href="javascript:void(0);" onclick="menu.export.showPopup(true);" title="Export to Chip"><img src="img/chip.png" /></a>
             </div>
         </div>
     </section>
@@ -46,7 +47,7 @@
     <section data-topic="body">
         <div id="main" oncontextmenu="return false;">
             <div id="nav" class="noselect striped">
-                <span>Inputs <span class='collapse-btn' data-control='menu-in'></span></span>
+                <span>Inputs <span class='collapse-btn' data-control='menu-in' data-visible="1"></span></span>
                 <div id='menu-in'>
                     <div onclick="app.startInsert(ToggleInput.ID);"><img src="img/input.png" title="Clicking toggle the state" /><br><span>Toggle</span></div>
                     <div onclick="app.startInsert(PushInput.ID);"><img src="img/input.png" title="Clicking changes state off->on->off" /><br><span>Push</span></div>
@@ -55,14 +56,7 @@
                     <div onclick="app.startInsert(Clock.ID);"><img src="img/clock-wave.png" /><br><span>Clock</span></div>
                 </div>
 
-                <span>Outputs <span class='collapse-btn' data-control='menu-out'></span></span>
-                <div id='menu-out'>
-                    <div onclick="app.startInsert(Output.ID);"><img src="img/output.png" /><br><span>Output</span></div>
-                    <div onclick="app.startInsert(Output_4bit.ID);"><img src="img/4-bit-output.png" title="4-bit display" /><br><span>4-bit</span></div>
-                    <div onclick="app.startInsert(Output_Nbit.ID);"><img src="img/n-bit-output.png" title="Arbitrary-bit display" /><br><span>&Nscr;-bit</span></div>
-                </div>
-
-                <span>Logic Gates <span class='collapse-btn' data-control='menu-lg'></span></span>
+                <span>Logic Gates <span class='collapse-btn' data-control='menu-lg' data-visible="1"></span></span>
                 <div id='menu-lg'>
                     <div onclick="app.startInsert(LogicGate.ID, 0);"><img src="img/buffer.png" /><br><span>Buffer</span></div>
                     <div onclick="app.startInsert(LogicGate.ID, 1);"><img src="img/not.png" /><br><span>Not</span></div>
@@ -74,11 +68,21 @@
                     <div onclick="app.startInsert(LogicGate.ID, 7);"><img src="img/xnor.png" /><br><span>Xnor</span></div>
                 </div>
 
-                <span>Utility <span class='collapse-btn' data-control='menu-util'></span></span>
+                <span>Outputs <span class='collapse-btn' data-control='menu-out' data-visible="0"></span></span>
+                <div id='menu-out'>
+                    <div onclick="app.startInsert(Output.ID);"><img src="img/output.png" /><br><span>Output</span></div>
+                    <div onclick="app.startInsert(Output_4bit.ID);"><img src="img/4-bit-output.png" title="4-bit display" /><br><span>4-bit</span></div>
+                    <div onclick="app.startInsert(Output_Nbit.ID);"><img src="img/n-bit-output.png" title="Arbitrary-bit display" /><br><span>&Nscr;-bit</span></div>
+                </div>
+
+                <span>Utility <span class='collapse-btn' data-control='menu-util' data-visible="0"></span></span>
                 <div id='menu-util'>
                     <div onclick="app.startInsert(Label.ID);"><img src="img/label.png" /><br><span>Label</span></div>
                     <div onclick="app.startInsert(CommentBox.ID);"><img src="img/comment.png" /><br><span>Comment</span></div>
                 </div>
+
+                <span>Chips <span class='collapse-btn' data-control='menu-chips' data-visible="0"></span></span>
+                <div id="menu-chips"></div>
             </div>
             <div id="container"></div>
         </div>
@@ -189,7 +193,7 @@
         </div>
         <div class="popup centre" id="popup-upload">
             <h2>Upload File</h2>
-            <input type="file" id="upload-input" accept=".lgc" onchange="menu.uploadFile.upload();" />
+            <input type="file" id="upload-input" onchange="menu.uploadFile.upload();" />
             <br><br>
             <a class="btn" href="javascript:void(0);" onclick="menu.uploadFile.showPopup(false);">Close</a>
         </div>
@@ -217,10 +221,17 @@
         </div>
         <div class="popup centre" id="popup-nbit">
             <h2>&Nscr;-Bit Output</h2>
-            <p>Inputs <input type='number' step='1' id='popup-nbit-input' /></p>
+            <p>Inputs <input type='range' step='1' id='popup-nbit-input' />  (<span id='popup-nbit-span'></span>)</p>
             <p>Max Number: <span id='popup-nbit-max'></span></p>
             <br>
             <a class="btn" href="javascript:void(0);" onclick="menu.nBitOutput.close();">Close</a>
+        </div>
+        <div class="popup centre" id="popup-export">
+            <h2>Create Chip</h2>
+            <p>Name: <input type='text' id='popup-export-name' /></p>
+            <br>
+            <a class="btn" href="javascript:void(0);" onclick="menu.export.export();">Create</a>
+            <a class="btn" href="javascript:void(0);" onclick="menu.export.showPopup(false);">Cancel</a>
         </div>
     </section>
 
@@ -240,6 +251,7 @@
         <script type="text/javascript" charset="utf-8" src="./src/classes/outputs.js"></script>
         <script type="text/javascript" charset="utf-8" src="./src/classes/logic_gate.js"></script>
         <script type="text/javascript" charset="utf-8" src="./src/classes/utility.js"></script>
+        <script type="text/javascript" charset="utf-8" src="./src/classes/chip.js"></script>
         
         <script type="text/javascript" charset="utf-8" src="./src/socket.js"></script>
         <script type="text/javascript" charset="utf-8" src="./src/menu.js"></script>

@@ -11,32 +11,34 @@ class Output extends LabeledComponent {
 
     render() {
         super.render(() => {
+            const state = this.getInputState(0);
+
             fill(200);
             strokeWeight(2);
             stroke(0);
             rect(-this.w / 2, -this.h / 2, this.w, this.h, 6);
 
             noStroke();
-            fill(...app.opts['colour' + this.state]);
+            fill(...app.opts['colour' + state]);
             textSize(35);
             textAlign(CENTER, CENTER);
-            text(this.state, 0, 0);
+            text(state, 0, 0);
         });
     }
 
-    eval() {
-        this.state = this.getInputState(0);
-        return false;
+    eval() { }
+
+    /** @override */
+    backtrace(out, subin) {
+        if (this.inputs[0].c) {
+            return this.inputs[0].c.backtrace(this.inputs[0].ci, subin);
+        } else {
+            return subin ? '0' : '?';
+        }
     }
 
     /** @override */
-    backtrace(subin) {
-        if (this.inputs[0].c) {
-            return this.inputs[0].c.backtrace(subin);
-        } else {
-            return subin ? 0 : '?';
-        }
-    }
+    backtraceJS(out) { return this.inputs[0].c ? this.inputs[0].c.backtraceJS(this.inputs[0].ci) : '0'; }
 }
 
 Output.hoverInfo = true;
@@ -65,7 +67,6 @@ class Output_4bit extends Component {
         this._segment.onColour = color(...app.opts.colour1);
 
         this.num = 0;
-        this.state = 1;
     }
 
     get name() { return '4-bit output'; }
@@ -78,15 +79,9 @@ class Output_4bit extends Component {
         }
     }
 
-    get state() { return super.state; }
-    set state(v) {
-        super.state = v;
-        this._segment.on = this.state;
-    }
-
     /** Get binary inputs */
     getBinary() {
-        let bits = this.inputs.map(obj => obj.c ? obj.c.state : 0);
+        let bits = this.inputs.map(obj => obj.c.getState(0));
         bits.reverse();
         return bits.join('');
     }
@@ -104,23 +99,15 @@ class Output_4bit extends Component {
 
     eval() {
         let num = 0;
-        this._segment.on = this.state;
         for (let i = 0; i < this.inputs.length; i++) {
             num += this.getInputState(i) * Math.pow(2, i);
         }
         if (num != this.num) this.num = num;
     }
 
-    event_mouseup(beenMoved) {
-        if (!beenMoved) {
-            playSound('click');
-            this.state ^= 1;
-        }
-    }
-
     getPopupText() {
         const arr = super.getPopupText();
-        if (this.state) arr.push("Value: " + this.num, ` • 0b${this.getBinary()}`, ` • 0x${this.num.toString(16).toUpperCase()}`);
+        arr.push("Value: " + this.num, ` • 0b${this.getBinary()}`, ` • 0x${this.num.toString(16).toUpperCase()}`);
         return arr;
     }
 }
@@ -132,11 +119,10 @@ Output_4bit.hoverInfo = true;
 class Output_Nbit extends Component {
     constructor(x, y) {
         super(x, y);
-        this.h = 102;
+        this.h = 85;
         this._segments = [];
         this._max = 0; // Stores this.getMax() from last this.adjust() call
         this._num = 0;
-        this.state = 1;
         this.setInputs(1);
         this.num = 0;
     }
@@ -169,7 +155,6 @@ class Output_Nbit extends Component {
      */
     setInputs(n) {
         if (n < 1 || n > Output_Nbit.max || n == this.inputs.length) return;
-        let originalState = this.state;
         if (n > this.inputs.length) {
             let lim = n - this.inputs.length;
             for (let i = 0; i < lim; i++) this.inputs.push(createInputConnObj(0, 0));
@@ -179,7 +164,6 @@ class Output_Nbit extends Component {
                 this.inputs.pop();
             }
         }
-        if (this.state != originalState) this.state = originalState;
         this.adjust();
     }
 
@@ -221,7 +205,7 @@ class Output_Nbit extends Component {
 
     /** Get binary inputs */
     getBinary() {
-        let bits = this.inputs.map(obj => obj.c ? obj.c.state : 0);
+        let bits = this.inputs.map(obj => obj.c.getState(0));
         bits.reverse();
         return bits.join('');
     }
@@ -273,7 +257,7 @@ class Output_Nbit extends Component {
 
     getPopupText() {
         const arr = super.getPopupText();
-        if (this.state) arr.push("Value: " + this.num, ` • 0x${this.num.toString(16).toUpperCase()}`);
+        arr.push("Value: " + this.num, ` • 0x${this.num.toString(16).toUpperCase()}`);
         return arr;
     }
 }

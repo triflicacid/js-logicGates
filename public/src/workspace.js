@@ -42,6 +42,9 @@ class Workspace {
 
         /** Are we evaluating? */
         this._running = true;
+
+        /** Array of all chip data */
+        this.chips = [];
     }
 
     get isRunning() { return this._running; }
@@ -110,7 +113,7 @@ class Workspace {
             } else {
                 const info = c.getPopupText();
 
-                let w = 100, h = (info.length + 2) * spacing + spacing;
+                let w = 100, h = (info.length + 1) * spacing + spacing;
                 rect(x, y, w, h);
 
                 fill(250, 255);
@@ -121,13 +124,6 @@ class Workspace {
                 y += spacing;
 
                 text(c.name, x, y);
-
-                y += spacing;
-                text('State: ', x, y);
-                push();
-                fill(...app.opts['colour' + c.state]);
-                text(c.state ? "On" : "Off", x + 40, y);
-                pop();
 
                 for (let txt of info) {
                     y += spacing;
@@ -301,18 +297,15 @@ class Workspace {
      * @param {number} y The y position of the component
      * @return {Component | null} The created component (or null if type unknown)
      */
-    static createComponent(type, data, x, y) {
+    createComponent(type, data, x, y) {
         switch (type) {
             case ToggleInput.ID: {
                 let c = new ToggleInput(x, y);
-                c.state = data;
+                c.setState(0, data);
                 return c;
             }
-            case ConstInput.ID: {
-                let c = new ConstInput(x, y);
-                c.state = data;
-                return c;
-            }
+            case ConstInput.ID:
+                return new ConstInput(x, y, data);
             case PushInput.ID:
                 return new PushInput(x, y);
             case LogicGate.ID:
@@ -341,6 +334,11 @@ class Workspace {
                 if (typeof data === "number") c.setInputs(data);
                 return c;
             }
+            case Chip.ID: {
+                let cdata = this.chips[data];
+                if (cdata == null) return null;
+                return Chip.fromObject(cdata, x, y);
+            }
             default:
                 return null;
         }
@@ -358,7 +356,15 @@ class Workspace {
         // Logic gates
         if (data.e) {
             for (let el of data.e) {
-                let object = Workspace.createComponent(el.t, el.d, el.x, el.y);
+                if (el.t == Chip.ID) {
+                    let i = workspace.chips.findIndex(obj => obj.name == el.d.name);
+                    if (i == -1) {
+                        i = workspace.chips.push(el.d) - 1;
+                    }
+                    el.d = i;
+                }
+
+                let object = workspace.createComponent(el.t, el.d, el.x, el.y);
                 if (object) {
                     if (el.l) object.label = el.l;
                     workspace.addComponent(object, el.id);

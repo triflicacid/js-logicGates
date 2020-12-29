@@ -13,26 +13,33 @@ class Component {
         this.w = 50;
         this.h = 50;
 
-        /** State of component
-         * @getter state
-         * @type {0 | 1}
-         */
-        this._state = 0;
-
         this.onStateChange = undefined; // Called whenever state is changed
         this.isHighlighted = false;
     }
 
-    get state() { return this._state; }
-    set state(s) {
-        s = s ? 1 : 0;
-        if (s != this._state) {
-            this._state = s;
-            if (typeof this.onStateChange === 'function') this.onStateChange();
-        }
-    }
-
     get name() { return this.constructor.name; }
+
+    /**
+     * Get state at node {i}
+     * @param {number} i - Output node index
+     * @return {0 | 1} State
+    */
+    getState(i) { return this.outputs[i].s; }
+
+    /**
+     * Set state at node {i}
+     * @param {number} i - Output node index
+     * @param {0 | 1} s - New state. Will be converted to 0 or 1 as s = s ? 1 : 0
+    */
+    setState(i, s) {
+        try {
+            this.outputs[i].s = s ? 1 : 0;
+        } catch (e) {
+            console.log("i =", i, ";s =", s, this.outputs);
+            throw e;
+        }
+        if (typeof this.onStateChange == 'function') this.onStateChange();
+    }
 
     /**
      * Render connections
@@ -143,8 +150,12 @@ class Component {
      * @return {0 | 1} State
      */
     getInputState(ino) {
-        if (ino > this.inputs.length - 1) throw new Error(`Component ${this.name}: cannot get input state with index ${ino}`);
-        return this.inputs[ino].c ? this.inputs[ino].c.state : 0;
+        if (ino < 0 || ino > this.inputs.length - 1) throw new Error(`Component ${this.name}: cannot get input state with index ${ino}`);
+        if (this.inputs[ino].c) {
+            return this.inputs[ino].c.outputs[this.inputs[ino].ci].s;
+        } else {
+            return 0;
+        }
     }
 
     /**
@@ -162,12 +173,22 @@ class Component {
 
     /**
      * Backtrace and return algebraic representation
+     * @param {number} out - Which output node index did the request come from?
      * @param {boolean} subin   Sub in Input values?
      * @return {string}
      */
-    backtrace() {
+    backtrace(out, subin) {
         console.warn(`Each component must have an overrided backtrace method`);
         return '?';
+    }
+
+    /**
+     * Backtrace and return JavaScript representation
+     * @param {number} out - Which output node index did the request come from?
+     * @return {string}
+     */
+    backtraceJS(out) {
+        throw new Error(`backtraceJS() is not implemented for component type ` + this.constructor.name);
     }
 
     /**

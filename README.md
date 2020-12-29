@@ -21,7 +21,7 @@ Stored under `src/lib/*`
 
 - `Label`, `Comment`, `Trace Table` icons made by [Freepik from www.flaticon.com](https://www.flaticon.com/authors/freepik)
 - `Share` icon made by [Pixel perfect from www.flaticon.com](https://www.flaticon.com/authors/pixel-perfect)
-
+- `Chip` icon made by [DinosoftLabs from www.flaticon.com](https://www.flaticon.com/authors/dinosoftlabs)
 ---
 
 Author: Ruben Saunders

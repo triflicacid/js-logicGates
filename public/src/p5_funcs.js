@@ -8,6 +8,7 @@ function setup() {
     segment = new Segment(200, 200);
 }
 let lastChangeAlteredValue = true;
+
 function draw() {
     if (app.workspace) {
         if (app.file.name && app.workspace.contentAltered != lastChangeAlteredValue) {
@@ -99,8 +100,7 @@ function mouseDragged() {
     if (app.isFrozen || app.opts.readonly || !isHidden(app.html.cover)) return;
 
     if (app.workspace.componentDragging) {
-        if (mouseX < app.workspace.componentDragging.w / 2 || mouseX > width - app.workspace.componentDragging.w / 2
-            || mouseY < app.workspace.componentDragging.h / 2 || mouseY > height - app.workspace.componentDragging.h / 2) return;
+        if (mouseX < app.workspace.componentDragging.w / 2 || mouseX > width - app.workspace.componentDragging.w / 2 || mouseY < app.workspace.componentDragging.h / 2 || mouseY > height - app.workspace.componentDragging.h / 2) return;
         app.workspace.componentOver.x = roundCoord(mouseX);
         app.workspace.componentOver.y = roundCoord(mouseY);
         app.workspace.componentBeenMoved = true;
@@ -212,7 +212,11 @@ function keyPressed(event) {
                 menu.saveFile();
                 return false;
             } else if (event.key == 'S') {
-                menu.saveAs.showPopup(true);
+                if (app.workspace.componentOver instanceof Chip) {
+                    menu.saveChip(app.workspace.componentOver);
+                } else {
+                    menu.saveAs.showPopup(true);
+                }
             } else if (event.key == 'z') {
                 app.history.undoBtn();
             } else if (event.key == 'y') {

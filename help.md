@@ -104,6 +104,12 @@ This will generate a truth table for the circuit (shows all possible states of t
 
 This can be accessed via the keyboard shortcut `t`
 
+### Export
+
+Attempts to export current circuit to a chip
+
+See `Chip` section for more about chips
+
 # Components
 
 ## Inputs
@@ -179,6 +185,18 @@ The bound label acts as an identifier for the Input/Output, should the circuit b
 The comment is able to hold an arbitrary length of text.
 
 To view/edit the comment, click on the component to view a textarea.
+
+# Chips
+
+Chips are circuits which may be included into other circuits
+
+When creating, any toggle/push/constant inputs will be taken as inputs to the chip, and any output components will be taken as the outputs.
+
+When created, the chip will be added to the `Chips` section on the left-hand side menu. *NB this is for the current workspace only*
+
+Chips may be saved by clicking on them in the workspace, or by pressing the floppy disk button in the menu.
+
+Chips mey be uploaded to a workspace via the chips section in the menu, and then be used.
 
 # Keyboard Control
 

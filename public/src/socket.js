@@ -8,6 +8,12 @@ const socket = {
 
     // Get file data
     this._.on('file-data', data => typeof this.getFile.callback == 'function' && this.getFile.callback(data));
+    this.getFile.callback = (data) => {
+      app.file.open = true;
+      app.file.name = data.name;
+      app.file.data = data.data;
+      app.openWorkspace();
+    };
 
     // Get file list
     this._.on('file-list', flist => typeof this.fileList.callback == 'function' && this.fileList.callback(flist));
@@ -24,11 +30,11 @@ const socket = {
     };
 
     // Create file
-    this._.on('created-file', fname => typeof this.newFile.callback == 'function' && this.newFile.callback(fname));
-    this.newFile.callback = fname => {
+    this._.on('created-file', data => typeof this.newFile.callback == 'function' && this.newFile.callback(data));
+    this.newFile.callback = data => {
       // If this is called, must be no errors
       menu.saveAs.showPopup(false);
-      app.message(`File created: ${fname}`, INFO);
+      app.message(`File created: ${data.name}`, INFO);
       menu.saveAs.inputName.value = '';
       menu.saveAs.inputPasswd.value = '';
 
@@ -65,7 +71,7 @@ const socket = {
     callback: undefined,
 
     /** 
-     * Request file data from a file
+     * Request file data from a circuit file
      * @param {string} file - Name of file to get data from
      * @param {string | null} passwd - The password that is protecting the file
      * @param {Function | null} callback
@@ -73,7 +79,7 @@ const socket = {
     request(file, passwd, callback = undefined) {
       if (callback !== undefined) this.callback = callback;
       socket._.emit('get-file', { file, passwd });
-    }
+    },
   },
 
   /** Write data to file */
@@ -101,7 +107,7 @@ const socket = {
     callback: undefined,
 
     /**
-     * Create file
+     * Create (Circuit) file
      * @param {string} name  Name of file to create
      * @param {string | null} passwd  Password to protect file with
      * @param {string | undefined} data   Data to write to file
@@ -112,7 +118,7 @@ const socket = {
       let obj = { name, passwd };
       if (typeof data === 'string') obj.data = data;
       socket._.emit('create-file', obj);
-    }
+    },
   },
 
   /** Delete file */

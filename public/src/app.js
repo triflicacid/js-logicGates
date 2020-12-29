@@ -169,6 +169,7 @@ const app = {
       for (let el of document.getElementsByClassName('current-file')) el.innerText = this.file.name;
       menu.advancedOpts.update();
       menu.renderEvalBtn();
+      menu.sidebar.updateChips();
     }
   },
 
@@ -190,6 +191,7 @@ const app = {
       app.statusbar.removeItem('File');
       app.statusbar.removeItem('Up-To-Date');
 
+      menu.sidebar.menu_chips.innerHTML = '';
       menu.renderEvalBtn();
     }
   },
@@ -323,11 +325,13 @@ const app = {
         if (app.opts.readonly) {
           readonlyMsg();
         } else {
-          let c = Workspace.createComponent(...app.insertData, roundCoord(x), roundCoord(y));
+          let c = app.workspace.createComponent(...app.insertData, roundCoord(x), roundCoord(y));
           if (c) {
             app.workspace.addComponent(c);
             if (c instanceof LabeledComponent) c.label = c.id.toString();
             app.workspace.contentAltered = true;
+          } else {
+            app.message(`Unable to insert component`, ERROR);
           }
         }
         app.insertData = null;
@@ -356,6 +360,25 @@ const app = {
   defaultOptData() {
     return [50, 120, 1, 9, 1, 25, 0];
   },
+
+  /**
+   * Add new chip to sidebar
+   * @param {object} data - Chip data
+   * @param {Workspace} ws - Workspace to add to
+   * @return {number} Index of chip data
+   * */
+  addChip(data, workspace = undefined) {
+    if (workspace == undefined) workspace = app.workspace;
+
+    let index = workspace.chips.findIndex(x => x.name == data);
+    if (index == -1) {
+      let n = workspace.chips.push(data);
+      menu.sidebar.updateChips();
+      return n - 1;
+    } else {
+      return index;
+    }
+  }
 };
 
 const INFO = 0;
