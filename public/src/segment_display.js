@@ -84,6 +84,10 @@ class Segment {
         }
     }
 
+    toNumber() {
+        return SEGMENT_ENCODED_NUMS.indexOf(this.value);
+    }
+
     static getNum(i) {
         i = i % SEGMENT_ENCODED_NUMS.length;
         return SEGMENT_ENCODED_NUMS[i];

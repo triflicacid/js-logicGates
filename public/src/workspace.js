@@ -245,7 +245,7 @@ class Workspace {
     evaluate() {
         if (this.isRunning) {
             for (let id in this._els) {
-                if (this._els.hasOwnProperty(id) && this._els[id] instanceof Input) this._els[id].chain_eval();
+                if (this._els.hasOwnProperty(id) && (this._els[id] instanceof Input || this._els[id] instanceof DecimalInput)) this._els[id].chain_eval();
             }
             this.stateChanged = false;
         }
@@ -308,6 +308,14 @@ class Workspace {
                 return new ConstInput(x, y, data);
             case PushInput.ID:
                 return new PushInput(x, y);
+            case DecimalInput.ID: {
+                let c = new DecimalInput(x, y);
+                if (typeof data === "string") {
+                    c.setOutputs(data.length);
+                    c.num = parseInt(data, 2);
+                }
+                return c;
+            }
             case LogicGate.ID:
                 return new LogicGate(LogicGate.types[data], x, y);
             case Label.ID: {

@@ -206,3 +206,164 @@ class ConstInput extends Input {
 ConstInput.ID = 7;
 ConstInput.isChangeable = false;
 ConstInput.hoverInfo = true;
+
+
+class DecimalInput extends Component {
+  constructor(x, y) {
+    super(x, y);
+    this.h = 85;
+    this._segments = [];
+    this._max = 0; // Stores this.getMax() from last this.adjust() call
+    this._num = 0;
+    this.setOutputs(1);
+    this._num = 0;
+  }
+
+  get name() { return this.outputs.length + "-bit Input"; }
+
+  get num() { return this._num; }
+  set num(num) {
+    num %= this._max + 1;
+    this._num = num;
+
+    let length = this._max.toString().length;
+    let digits = num.toString().padStart(length, '0');
+    for (let i = 0; i < digits.length; i++) {
+      this._segments[digits.length - 1 - i].value = +digits[i];
+    }
+    this.updateOutputs();
+  }
+
+  /**
+   * Set a new number of outputs
+   * @param {number} n - Number of inputs 
+   */
+  setOutputs(n) {
+    if (n < 1 || n > DecimalInput.max || n == this.outputs.length) return;
+    if (n > this.outputs.length) {
+      let lim = n - this.outputs.length;
+      for (let i = 0; i < lim; i++) this.outputs.push(createOutputConnObj(0, 0));
+    } else {
+      while (this.outputs.length > n) {
+        removeConn(this, true, this.outputs.length - 1);
+        this.outputs.pop();
+      }
+    }
+    this.adjust();
+  }
+
+  /**
+   * Adjust size, spacing etc...
+   */
+  adjust() {
+    const max = this.getMax();
+    const segments = max.toString().length;
+    this._segments.length = 0;
+    let pad = 20;
+    this.w = (DecimalInput.segw + pad) * segments;
+    let x = -this.w / 2 + DecimalInput.segw / 2 + pad / 2;
+    let y = 0;
+    for (let i = 0; i < segments; i++) {
+      const s = new Segment(0, 0);
+      s.width = DecimalInput.segw;
+      s.height = DecimalInput.segh;
+      s.x = x - s.width / 2;
+      s.y = -s.height / 2;
+      s.roundness = 5;
+      s.onColour = color(...app.opts.colour1);
+      this._segments.unshift(s);
+      x += DecimalInput.segw + pad;
+    }
+
+    let space = this.h / this.outputs.length;
+    y = -this.h / 2 + space / 2;
+    x = this.w / 2;
+    for (let i = 0; i < this.outputs.length; i++) {
+      this.outputs[i].x = x;
+      this.outputs[i].y = y;
+      y += space;
+    }
+
+    this._max = this.getMax();
+    if (this.num != 0) this.num = this.num;
+  }
+
+  getSegmentValue() {
+    let n = 0;
+    for (let i = 0; i < this._segments.length; i++)
+      n += this._segments[i].toNumber() * Math.pow(10, i);
+    return n;
+  }
+
+  /** Get maximum value (decimal) */
+  getMax() {
+    return Math.pow(2, this.outputs.length) - 1;
+  }
+
+  getBinary() {
+    return this.num.toString(2).padStart(this.outputs.length, '0');
+  }
+
+  updateOutputs() {
+    const bin = this.getBinary();
+    for (let i = 0; i < this.outputs.length; i++) {
+      this.setState(i, bin[bin.length - i - 1] == "1");
+    }
+  }
+
+  eval() { }
+
+  render() {
+    super.render(() => {
+      fill(200);
+      strokeWeight(2);
+      stroke(0);
+      rect(-this.w / 2, -this.h / 2, this.w, this.h, 6);
+
+      for (let s of this._segments) s.display();
+    });
+  }
+
+  event_mouseup(beenMoved, x, y) {
+    if (!beenMoved) {
+      let segment;
+      x -= this.x;
+      y -= this.y;
+
+      for (let s of this._segments) {
+        if (x < s.x || x > s.x + s.width || y < s.y || y > s.y + s.height) continue;
+        segment = s;
+        break;
+      }
+
+      if (segment) {
+        // Increment value
+        let val = (segment.toNumber() + 1) % 10;
+        segment.value = val;
+
+        let n = this.getSegmentValue();
+        if (n != this.num) this.num = n;
+      } else {
+        menu.nBitInput.open(this);
+      }
+    }
+  }
+
+  toObject() {
+    let obj = super.toObject();
+    obj.d = this.getBinary();
+    return obj;
+  }
+
+  getPopupText() {
+    const arr = super.getPopupText();
+    arr.push("Value: " + this.num, ` • 0x${this.num.toString(16).toUpperCase()}`);
+    return arr;
+  }
+}
+
+DecimalInput.ID = 11;
+DecimalInput.hoverInfo = true;
+DecimalInput.segw = 33;
+DecimalInput.segh = 15;
+DecimalInput.max = 16;

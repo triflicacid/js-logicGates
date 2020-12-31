@@ -377,6 +377,52 @@ const menu = {
     },
   },
 
+  /** Stuff for DecimalInput */
+  nBitInput: {
+    _: document.getElementById('popup-decin'),
+    output: document.getElementById('popup-decin-output'),
+    max: document.getElementById('popup-decin-max'),
+    span: document.getElementById('popup-decin-span'),
+    obj: null,
+
+    init() {
+      this.output.setAttribute('min', 1);
+      this.output.setAttribute('max', DecimalInput.max);
+      this.output.addEventListener('input', this.update.bind(this));
+    },
+
+    open(obj) {
+      hide(this._, false);
+      hide(app.html.cover, false);
+      this.obj = obj;
+      this.output.value = obj.outputs.length;
+      this.max.innerText = obj.getMax();
+      this.span.innerText = obj.outputs.length;
+      if (app.opts.readonly) this.output.setAttribute('readonly', 'readonly');
+    },
+
+    /** Update obj and rendering */
+    update() {
+      let val = +this.output.value;
+      if (isNaN(val)) val = this.obj.every;
+      else if (val < 1) val = 1;
+      else if (val > DecimalInput.max) val = DecimalInput.max;
+      this.output.value = val;
+      this.span.innerText = val;
+      this.max.innerText = Math.pow(2, val) - 1;
+    },
+
+    close() {
+      hide(this._, true);
+      hide(app.html.cover, true);
+      this.max.innerText = this.span.innerText = '';
+      this.obj.setOutputs(+this.output.value);
+      this.output.value = '';
+      this.obj = null;
+      this.output.removeAttribute('readonly');
+    },
+  },
+
   /** Download canvas as image */
   downloadImage() {
     let image = app.p5canvas.elt.toDataURL("image/png").replace("image/png", "image/octet-stream");
@@ -731,8 +777,8 @@ const menu = {
       const labels = [];
       let foundInput = false, foundOutput = false;
       app.workspace.forEachComponent(c => {
-        if (c.constructor.name == "Clock" || c.constructor.name == "Output_4bit" || c.constructor.name == "Output_Nbit") {
-          app.message(`Component ${c.name} cannot be present in a chip`, ERROR, etitle);
+        if (c.constructor.name == "Clock" || c.constructor.name == "Output_4bit" || c.constructor.name == "Output_Nbit" || c.constructor.name == "DecimalInput") {
+          app.message(`Component ${c.name} (${c.constructor.name}) cannot be present in a chip`, ERROR, etitle);
           ok = false;
           return false;
         }

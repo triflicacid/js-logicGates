@@ -139,7 +139,7 @@ function mouseReleased() {
         return;
     }
 
-    if (app.workspace.componentOver) app.workspace.componentOver.event_mouseup(app.workspace.componentBeenMoved);
+    if (app.workspace.componentOver) app.workspace.componentOver.event_mouseup(app.workspace.componentBeenMoved, mouseX, mouseY);
 
     // Clicked?
     if (app.workspace.componentOver && !app.workspace.componentBeenMoved) {

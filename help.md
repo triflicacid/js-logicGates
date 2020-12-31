@@ -136,6 +136,14 @@ This component switches between on/off (1/0, high/low) states after a specified 
 
 A clocks' speed may be changed by clicking on it, which will bring up a prompt. Signal duration (ms) ranges between 100 - 9999.
 
+### Decimal
+
+Allows a decimal (normal) number to be inputted, and outputs as binary in several output connections. Binary representation LSB is from top-to-bottom.
+
+Click on the component edges to change the number of outputs (And therefore the maximum number which may be inputted)
+
+Click on a digit to increment its value 0-9, and therefore change the binary output.
+
 ## Outputs
 
 ### Output

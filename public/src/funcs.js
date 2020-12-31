@@ -104,6 +104,7 @@ const getConn = (workspace, tuple) => workspace.getComponent(tuple[0])[tuple[1] 
  */
 function removeConn(comp, isInput, cindex) {
     const obj = comp[isInput ? 'inputs' : 'outputs'][cindex];
+    if (obj == undefined) return;
 
     if (Array.isArray(obj.c)) {
         // OUTPUT connection

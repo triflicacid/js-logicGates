@@ -54,6 +54,7 @@
                     <div onclick="app.startInsert(ConstInput.ID, 0);"><img src="img/const-input-off.png" title="Constant Low (Off)" /><br><span>Low</span></div>
                     <div onclick="app.startInsert(ConstInput.ID, 1);"><img src="img/const-input-on.png" title="Constant High (On)" /><br><span>High</span></div>
                     <div onclick="app.startInsert(Clock.ID);"><img src="img/clock-wave.png" /><br><span>Clock</span></div>
+                    <div onclick="app.startInsert(DecimalInput.ID);"><img src="img/n-bit-output.png" title="Decimal (Number) Input" /><br><span>Decimal</span></div>
                 </div>
 
                 <span>Logic Gates <span class='collapse-btn' data-control='menu-lg' data-visible="1"></span></span>
@@ -232,6 +233,13 @@
             <br>
             <a class="btn" href="javascript:void(0);" onclick="menu.export.export();">Create</a>
             <a class="btn" href="javascript:void(0);" onclick="menu.export.showPopup(false);">Cancel</a>
+        </div>
+        <div class="popup centre" id="popup-decin">
+            <h2>Decimal Input</h2>
+            <p>Outputs <input type='range' step='1' id='popup-decin-output' />  (<span id='popup-decin-span'></span>)</p>
+            <p>Max Number: <span id='popup-decin-max'></span></p>
+            <br>
+            <a class="btn" href="javascript:void(0);" onclick="menu.nBitInput.close();">Close</a>
         </div>
     </section>
 

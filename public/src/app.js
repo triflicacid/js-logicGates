@@ -69,6 +69,7 @@ const app = {
     this.statusbar.render();
     menu.clockComponent.init();
     menu.nBitOutput.init();
+    menu.nBitInput.init();
     menu.sidebar.init();
     initLogicGateData();
 

@@ -1,4 +1,4 @@
 function main() {
-  // menu.openFile.open({ name: 'triple-xorc' });
+  menu.openFile.open({ name: 'dec-input' });
   return 0;
 }

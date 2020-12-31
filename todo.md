@@ -10,6 +10,7 @@
 - ~~Chip/Integrated Circuit -> allow circuits to be exported into custom chips~~ (29/12/2020)
 - ~~Push-button~~ (24/12/2020, 20:18)
 - ~~Constant high/low emitter~~ (24/12/2020, 20:37)
+- ~~Decimal Input~~ (31/12/2020, 16:05)
 
 ## GUI
 
