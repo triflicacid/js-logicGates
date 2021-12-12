@@ -162,6 +162,12 @@ Takes in an arbitrary number of inputs (in a range) and converts to a decimal nu
 
 To adjust input count, click on the component to bring up a popup.
 
+### ASCII output
+
+Takes 8 inputs and calculates binary number (0-255).
+
+Outputs number in ASCII e.g. 65 -> A.
+
 ## Logic Gates
 
 There are 7 logic gates implemented: not, and, or, xor, nor, nand, xnor (see [Here](https://en.wikipedia.org/wiki/Logic_gate) for more)

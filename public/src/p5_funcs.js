@@ -1,4 +1,8 @@
 /** ============================= ENTRY POINT ============================= */
+function preload() {
+    app.preload();    
+}
+
 function setup() {
     app.p5canvas = createCanvas(1000, 666);
     app.p5canvas.parent(app.html.canvasContainer);

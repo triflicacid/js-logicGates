@@ -342,6 +342,8 @@ class Workspace {
                 if (typeof data === "number") c.setInputs(data);
                 return c;
             }
+            case OutputASCII.ID:
+                return new OutputASCII(x, y);
             case Chip.ID: {
                 let cdata = this.chips[data];
                 if (cdata == null) return null;

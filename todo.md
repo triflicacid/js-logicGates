@@ -11,6 +11,7 @@
 - ~~Push-button~~ (24/12/2020, 20:18)
 - ~~Constant high/low emitter~~ (24/12/2020, 20:37)
 - ~~Decimal Input~~ (31/12/2020, 16:05)
+- ~~ASCII Output~~ (12/12/2021, 16:37)
 
 ## GUI
 

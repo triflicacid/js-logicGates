@@ -39,6 +39,8 @@ const app = {
   /** Data for component-insertion */
   insertData: null,
 
+  font_clacon2: null,
+
   /** HTML elements for visuals */
   html: {
     menuBar: document.getElementsByClassName('menu-bar')[0],
@@ -48,6 +50,10 @@ const app = {
     cover: document.getElementsByClassName('cover')[0],
     nav: document.getElementById('nav'),
     evalBtn: document.getElementById('btn-eval'),
+  },
+
+  preload() {
+    this.font_clacon2 = loadFont('./img/clacon2.ttf');
   },
 
   init() {

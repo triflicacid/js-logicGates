@@ -267,3 +267,85 @@ Output_Nbit.hoverInfo = true;
 Output_Nbit.segw = 33;
 Output_Nbit.segh = 15;
 Output_Nbit.max = 16;
+
+class OutputASCII extends Component {
+    constructor(x, y) {
+        super(x, y);
+        this.h = 102;
+        this.w = 52;
+        this._num = 0;
+        this.num = 0;
+
+        let outx = -this.w / 2;
+        let yspace = this.h / 9;
+        let outy = -this.h / 2 + yspace;
+        for (let i = 0; i < 8; i++, outy += yspace) {
+            this.inputs[i] = createInputConnObj(outx, outy);
+        }
+    }
+
+    get name() { return "ASCII output"; }
+
+    get num() { return this._num; }
+    set num(num) {
+        this._num = num % 256;
+    }
+
+    /** Get binary inputs */
+    getBinary() {
+        let bits = this.inputs.map(obj => obj.c.getState(0));
+        bits.reverse();
+        return bits.join('');
+    }
+
+    /** Calculate decimal value */
+    getDecimal() {
+        let num = 0;
+        for (let i = 0; i < this.inputs.length; i++) {
+            num += this.getInputState(i) * Math.pow(2, i);
+        }
+        return num;
+    }
+
+    eval() {
+        this.num = this.getDecimal();
+    }
+
+    render() {
+        super.render(() => {
+            fill(200);
+            strokeWeight(2);
+            stroke(0);
+            rect(-this.w / 2, -this.h / 2, this.w, this.h, 6);
+            stroke(51);
+            fill(0);
+            rect(-this.w * (2 / 5), -this.h / 3, this.w * (4 / 5), this.h * (2 / 3), 4);
+            push();
+            textAlign(CENTER, CENTER);
+            textSize(45);
+            textFont(app.font_clacon2);
+            noStroke();
+            fill(50, 205, 50);
+            text(String.fromCharCode(this.num), 0, 0);
+            pop();
+        });
+    }
+
+    event_mouseup(beenMoved) {
+        if (!beenMoved) {
+            this.isHighlighted ^= 1;
+            if (this.isHighlighted) {
+                menu.nBitOutput.open(this);
+            }
+        }
+    }
+
+    getPopupText() {
+        const arr = super.getPopupText();
+        arr.push("Value: " + this.num, ` • 0x${this.num.toString(16).toUpperCase()}`);
+        return arr;
+    }
+}
+
+OutputASCII.ID = 12;
+OutputASCII.hoverInfo = true;
