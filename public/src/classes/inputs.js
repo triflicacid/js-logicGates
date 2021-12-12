@@ -71,6 +71,7 @@ class ToggleInput extends Input {
 ToggleInput.ID = 0;
 ToggleInput.isChangeable = true;
 ToggleInput.hoverInfo = true;
+ToggleInput.isInput = true;
 
 class PushInput extends Input {
   constructor(x, y, label) {
@@ -175,6 +176,7 @@ Clock.min = 100;
 Clock.max = 9999;
 Clock.isChangeable = true;
 Clock.ID = 5;
+Clock.isInput = true;
 
 class ConstInput extends Input {
   constructor(x, y, state, label) {
@@ -206,9 +208,10 @@ class ConstInput extends Input {
 ConstInput.ID = 7;
 ConstInput.isChangeable = false;
 ConstInput.hoverInfo = true;
+ConstInput.isInput = true;
 
 
-class DecimalInput extends Component {
+class DecimalInput extends LabeledComponent {
   constructor(x, y) {
     super(x, y);
     this.h = 85;
@@ -367,3 +370,4 @@ DecimalInput.hoverInfo = true;
 DecimalInput.segw = 33;
 DecimalInput.segh = 15;
 DecimalInput.max = 16;
+DecimalInput.isInput = true;

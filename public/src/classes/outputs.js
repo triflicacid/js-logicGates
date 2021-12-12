@@ -43,9 +43,10 @@ class Output extends LabeledComponent {
 
 Output.hoverInfo = true;
 Output.ID = 1;
+Output.isOutput = true;
 
 
-class Output_4bit extends Component {
+class Output_4bit extends LabeledComponent {
     constructor(x, y) {
         super(x, y);
         this.h = 102;
@@ -114,9 +115,10 @@ class Output_4bit extends Component {
 
 Output_4bit.ID = 8;
 Output_4bit.hoverInfo = true;
+Output_4bit.isOutput = true;
 
 
-class Output_Nbit extends Component {
+class Output_Nbit extends LabeledComponent {
     constructor(x, y) {
         super(x, y);
         this.h = 85;
@@ -267,8 +269,9 @@ Output_Nbit.hoverInfo = true;
 Output_Nbit.segw = 33;
 Output_Nbit.segh = 15;
 Output_Nbit.max = 16;
+Output_Nbit.isOutput = true;
 
-class OutputASCII extends Component {
+class OutputASCII extends LabeledComponent {
     constructor(x, y) {
         super(x, y);
         this.h = 102;
@@ -307,6 +310,11 @@ class OutputASCII extends Component {
         return num;
     }
 
+    /** Get character */
+    getChar() {
+        return String.fromCharCode(this.num);
+    }
+
     eval() {
         this.num = this.getDecimal();
     }
@@ -326,7 +334,7 @@ class OutputASCII extends Component {
             textFont(app.font_clacon2);
             noStroke();
             fill(50, 205, 50);
-            text(String.fromCharCode(this.num), 0, 0);
+            text(this.getChar(), 0, 0);
             pop();
         });
     }
@@ -347,5 +355,6 @@ class OutputASCII extends Component {
     }
 }
 
+OutputASCII.isOutput = true;
 OutputASCII.ID = 12;
 OutputASCII.hoverInfo = true;

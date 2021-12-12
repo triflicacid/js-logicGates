@@ -93,6 +93,9 @@ div.popup {
     box-shadow: 0px 3px 5px -2px black;
     border: 2px solid gray;
     border-radius: 3px;
+
+    overflow-y: scroll;
+    max-height: 50vw;
 }
 
 .centre {

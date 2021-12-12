@@ -631,11 +631,11 @@ const menu = {
 
       // Array of inputs/outputs
       const components = Object.values(app.workspace._els);
-      const inputs = components.filter(c => c instanceof Input && c.constructor.isChangeable), outputs = components.filter(c => c instanceof Output);
+      const inputs = components.filter(c => (c instanceof Input || c.constructor.isInput) && c.constructor.isChangeable), outputs = components.filter(c => c instanceof Output || c.constructor.isOutput);
 
       if (inputs.length > 0) {
         // Record labels
-        data[0] = inputs.map(c => c.label).concat(outputs.map(c => c.label));
+        data[0] = inputs.map(c => c.label).concat(outputs.map(c => c.label ?? ('#' + c.id)));
 
         // Record original states
         const originalStates = inputs.map(c => c.state);
@@ -647,7 +647,12 @@ const menu = {
           app.workspace.evaluate();
 
           // Get output states
-          data.push(states.map(s => +s).concat(outputs.map(c => c.getInputState(0))));
+          const getOutState = c => {
+            if (c instanceof OutputASCII) return c.getChar();
+            if (c instanceof Output_Nbit || c instanceof Output_4bit) return c.num;
+            else return c.getInputState(0);
+          }
+          data.push(states.map(s => +s).concat(outputs.map(c => getOutState(c))));
         }
 
         // Reset states
@@ -793,8 +798,8 @@ const menu = {
           }
         }
 
-        if (!foundInput && c instanceof Input) foundInput = true;
-        else if (!foundOutput && c instanceof Output) foundOutput = true;
+        if (!foundInput && (c instanceof Input || c.constructor.isInput)) foundInput = true;
+        else if (!foundOutput && (c instanceof Output || c.constructor.isOutput)) foundOutput = true;
       });
 
       if (!ok) return false;
@@ -817,8 +822,8 @@ const menu = {
       if (app.workspace.chips.findIndex(x => x.name == name) !== -1) return app.message(`Chip called '${name}' already exists`, ERROR);
 
       const components = Object.values(app.workspace._els);
-      const inputs = components.filter(c => c instanceof Input && !(c instanceof Clock));
-      const outputs = components.filter(c => c instanceof Output);
+      const inputs = components.filter(c => (c instanceof Input || c.constructor.isInput) && !(c instanceof Clock));
+      const outputs = components.filter(c => c instanceof Output || c.constructor.isOutput);
 
       let data = {
         name,

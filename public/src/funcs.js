@@ -15,7 +15,7 @@ const getComponentInfo = component => {
  * @param {0 | 1} state
  * @return {string} HTML span element
  */
-const getHTMLState = state => `<span class='status-${state ? 'on' : 'off'}'>${+state}</span>`;
+const getHTMLState = state => `<span class='status-${state ? 'on' : 'off'}'>${state}</span>`;
 
 /** Get HTML string for unknown */
 const getHTMLUnknown = () => '<span class="unknown">?</span>';

@@ -243,6 +243,7 @@ class LabeledComponent extends Component {
         this._labelObj = new Label(this.x, this.y - this.h);
         this._labelObj.linkedc = this;
         this.label = label;
+        if (!this._labelObj.txt) this._labelObj._txt = "";
     }
 
     get label() { return this._labelObj._txt; }
