@@ -74,13 +74,18 @@
                     <div onclick="app.startInsert(Output.ID);"><img src="img/output.png" /><br><span>Output</span></div>
                     <div onclick="app.startInsert(Output_4bit.ID);"><img src="img/4-bit-output.png" title="4-bit display" /><br><span>4-bit</span></div>
                     <div onclick="app.startInsert(Output_Nbit.ID);"><img src="img/n-bit-output.png" title="Arbitrary-bit display" /><br><span>&Nscr;-bit</span></div>
-                    <div onclick="app.startInsert(Output_ASCII.ID);"><img src="img/ascii-output.png" title="ASCII Character display" /><br><span>ASCII</span></div>
+                    <div onclick="app.startInsert(OutputASCII.ID);"><img src="img/ascii-output.png" title="ASCII Character display" /><br><span>ASCII</span></div>
                 </div>
 
                 <span>Utility <span class='collapse-btn' data-control='menu-util' data-visible="0"></span></span>
                 <div id='menu-util'>
                     <div onclick="app.startInsert(Label.ID);"><img src="img/label.png" /><br><span>Label</span></div>
                     <div onclick="app.startInsert(CommentBox.ID);"><img src="img/comment.png" /><br><span>Comment</span></div>
+                </div>
+
+                <span>Other <span class='collapse-btn' data-control='menu-other' data-visible="0"></span></span>
+                <div id='menu-other'>
+                    <div onclick="app.startInsert(DataReader.ID);"><img src="img/.png" /><br><span>Data Reader</span></div>
                 </div>
 
                 <span>Chips <span class='collapse-btn' data-control='menu-chips' data-visible="0"></span></span>
@@ -228,6 +233,13 @@
             <br>
             <a class="btn" href="javascript:void(0);" onclick="menu.nBitOutput.close();">Close</a>
         </div>
+         <div class="popup centre" id="popup-datareader">
+            <h2>Data Reader</h2>
+            <p>Data:</p>
+            <textarea id="popup-datareader-textarea"></textarea>
+            <br>
+            <a class="btn" href="javascript:void(0);" onclick="menu.dataReader.close();">Close</a>
+        </div>
         <div class="popup centre" id="popup-export">
             <h2>Create Chip</h2>
             <p>Name: <input type='text' id='popup-export-name' /></p>
@@ -260,6 +272,7 @@
         <script type="text/javascript" charset="utf-8" src="./src/classes/outputs.js"></script>
         <script type="text/javascript" charset="utf-8" src="./src/classes/logic_gate.js"></script>
         <script type="text/javascript" charset="utf-8" src="./src/classes/utility.js"></script>
+        <script type="text/javascript" charset="utf-8" src="./src/classes/other.js"></script>
         <script type="text/javascript" charset="utf-8" src="./src/classes/chip.js"></script>
         
         <script type="text/javascript" charset="utf-8" src="./src/socket.js"></script>

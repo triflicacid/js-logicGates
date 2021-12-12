@@ -133,7 +133,7 @@ div#nav {
     display: flex;
     flex-direction: column;
     justify-content: start;
-    width: 10vw;
+    width: 14vw;
     height: 90vh;
     overflow-y: auto;
     padding: 3px;

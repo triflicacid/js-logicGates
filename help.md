@@ -200,6 +200,16 @@ The comment is able to hold an arbitrary length of text.
 
 To view/edit the comment, click on the component to view a textarea.
 
+## Other
+
+### Data Reader
+
+Stores an array of uint8 numbers internally. Whenever it recieves a high signal from its LHS, its internal pointer will increment, reading out the data at that position.
+
+See circuit `datareader` for an example.
+
+Change data by clicking on the component and enter a comma-seperated list of numerical values.
+
 # Chips
 
 Chips are circuits which may be included into other circuits

@@ -377,6 +377,40 @@ const menu = {
     },
   },
 
+  /** Stuff for DataReader */
+  dataReader: {
+    _: document.getElementById('popup-datareader'),
+    textarea: document.getElementById('popup-datareader-textarea'),
+    obj: null,
+
+    init() {
+      this.textarea.addEventListener('change', this.update.bind(this));
+    },
+
+    open(obj) {
+      hide(this._, false);
+      hide(app.html.cover, false);
+      this.obj = obj;
+      this.textarea.value = obj.getData(', ');
+      if (app.opts.readonly) this.input.setAttribute('readonly', 'readonly');
+    },
+
+    /** Update obj and rendering */
+    update() {
+      this.obj.setData(this.textarea.value);
+      this.textarea.value = this.obj.getData(", ");
+    },
+
+    close() {
+      hide(this._, true);
+      hide(app.html.cover, true);
+      this.textarea.value = '';
+      this.obj.event_click();
+      this.obj = null;
+      this.textarea.removeAttribute('readonly');
+    },
+  },
+
   /** Stuff for DecimalInput */
   nBitInput: {
     _: document.getElementById('popup-decin'),
@@ -644,14 +678,14 @@ const menu = {
         for (const states of inputStates) {
           // Set states
           for (let i = 0; i < states.length; i++) inputs[i].setState(0, states[i]);
-          app.workspace.evaluate();
+          app.workspace.evaluate(true);
 
           // Get output states
           const getOutState = c => {
             if (c instanceof OutputASCII) return c.getChar();
             if (c instanceof Output_Nbit || c instanceof Output_4bit) return c.num;
             else return c.getInputState(0);
-          }
+          };
           data.push(states.map(s => +s).concat(outputs.map(c => getOutState(c))));
         }
 

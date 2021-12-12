@@ -76,6 +76,7 @@ const app = {
     menu.clockComponent.init();
     menu.nBitOutput.init();
     menu.nBitInput.init();
+    menu.dataReader.init();
     menu.sidebar.init();
     initLogicGateData();
 
@@ -177,6 +178,7 @@ const app = {
       menu.advancedOpts.update();
       menu.renderEvalBtn();
       menu.sidebar.updateChips();
+      this.workspace.isRunning = true;
     }
   },
 

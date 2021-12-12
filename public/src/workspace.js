@@ -23,6 +23,7 @@ class Workspace {
 
         /** Register: has there been a change in anything? (e.g. state change) ? */
         this.stateChanged = true;
+        this.stateChangeRequestor = null;
 
         /** Has content been altered? (used for saving) */
         this.contentAltered = false;
@@ -52,7 +53,7 @@ class Workspace {
         this._running = !!value;
         if (value) {
             this.stateChanged = true;
-            this.evaluate();
+            this.evaluate(true);
         } else {
             for (let id in this._els) if (this._els.hasOwnProperty(id) && this._els[id] instanceof Clock) this._els[id].stop();
         }
@@ -152,7 +153,10 @@ class Workspace {
      * @return {Number} ID of component
      */
     addComponent(component, id = undefined) {
-        component.onStateChange = () => this.stateChanged = true;
+        component.onStateChange = (c) => {
+            this.stateChanged = true;
+            this.stateChangeRequestor = c;
+        };
         if (id == undefined) {
             while (this._els[this._nextCID]) this._nextCID++;
             id = this._nextCID++;
@@ -242,10 +246,21 @@ class Workspace {
     /**
     * EValuate components
     */
-    evaluate() {
+    evaluate(all = false) {
         if (this.isRunning) {
-            for (let id in this._els) {
-                if (this._els.hasOwnProperty(id) && (this._els[id] instanceof Input || this._els[id] instanceof DecimalInput)) this._els[id].chain_eval();
+            if (all) {
+                console.log("Evaluate All")
+                for (let id in this._els) {
+                    if (this._els.hasOwnProperty(id) && (this._els[id] instanceof Input || this._els[id] instanceof DecimalInput)) this._els[id].chain_eval();
+                }
+            } else {
+                if (this.stateChangeRequestor) {
+                    const strid = this.stateChangeRequestor.id;
+                    this.stateChangeRequestor = null;
+                    for (let id in this._els) {
+                        if (this._els.hasOwnProperty(id) && +id === strid) this._els[id].chain_eval();
+                    }
+                }
             }
             this.stateChanged = false;
         }
@@ -344,6 +359,11 @@ class Workspace {
             }
             case OutputASCII.ID:
                 return new OutputASCII(x, y);
+            case DataReader.ID: {
+                let c = new DataReader(x, y);
+                if (typeof data === 'string') c.setData(data);
+                return c;
+            }
             case Chip.ID: {
                 let cdata = this.chips[data];
                 if (cdata == null) return null;

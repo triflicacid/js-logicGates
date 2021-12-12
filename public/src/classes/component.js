@@ -31,14 +31,14 @@ class Component {
      * @param {number} i - Output node index
      * @param {0 | 1} s - New state. Will be converted to 0 or 1 as s = s ? 1 : 0
     */
-    setState(i, s) {
+    setState(i, s, registerChange = true) {
         try {
             this.outputs[i].s = s ? 1 : 0;
         } catch (e) {
             console.log("i =", i, ";s =", s, this.outputs);
             throw e;
         }
-        if (typeof this.onStateChange == 'function') this.onStateChange();
+        if (registerChange && typeof this.onStateChange == 'function') this.onStateChange(this);
     }
 
     /**
