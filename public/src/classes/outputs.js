@@ -12,17 +12,19 @@ class Output extends LabeledComponent {
     render() {
         super.render(() => {
             const state = this.getInputState(0);
-
+            push();
             fill(200);
             strokeWeight(2);
             stroke(0);
             rect(-this.w / 2, -this.h / 2, this.w, this.h, 6);
 
             noStroke();
-            fill(...app.opts['colour' + state]);
+            fill(...app.opts['colour' + (state ? 1 : 0)]);
             textSize(35);
             textAlign(CENTER, CENTER);
+            textFont(app.font_clacon2);
             text(state, 0, 0);
+            pop();
         });
     }
 
@@ -76,7 +78,7 @@ class Output_4bit extends LabeledComponent {
         if (typeof v == 'number' && !isNaN(v)) {
             this._num = v;
             this._segment.value = v;
-            this._segment.onColour = color(...app.opts['colour' + (this.num == 0 ? 0 : 1)]);
+            this._segment.onColour = color(...app.opts['colour' + (this.num ? 1 : 0)]);
         }
     }
 

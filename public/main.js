@@ -1,4 +1,4 @@
 function main() {
-  // menu.openFile.open({ name: 'datareader' });
+  menu.openFile.open({ name: 'bus' });
   return 0;
 }

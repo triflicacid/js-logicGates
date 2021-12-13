@@ -33,7 +33,7 @@ class Component {
     */
     setState(i, s, registerChange = true) {
         try {
-            this.outputs[i].s = s ? 1 : 0;
+            this.outputs[i].s = +s;
         } catch (e) {
             console.log("i =", i, ";s =", s, this.outputs);
             throw e;
@@ -51,8 +51,9 @@ class Component {
             noFill();
             for (let i = 0; i < this.inputs.length; i++) {
                 const input = this.inputs[i];
+                const s = this.getInputState(i) ? 1 : 0;
                 if (input.c) {
-                    if (app.opts.colourConns) stroke(...app.opts['colour' + this.getInputState(i)]);
+                    if (app.opts.colourConns) stroke(...app.opts['colour' + s]);
                     let end = [this.x + input.x, this.y + input.y];
                     let start = [input.c.x + input.c.outputs[input.ci].x, input.c.y + input.c.outputs[input.ci].y];
                     drawCurve(start, end);

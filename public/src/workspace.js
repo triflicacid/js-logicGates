@@ -363,6 +363,16 @@ class Workspace {
                 if (typeof data === 'string') c.setData(data);
                 return c;
             }
+            case BusIn.ID: {
+                let c = new BusIn(x, y);
+                if (typeof data === "number") c.setInputs(data);
+                return c;
+            }
+            case BusOut.ID: {
+                let c = new BusOut(x, y);
+                if (typeof data === "number") c.setOutputs(data);
+                return c;
+            }
             case Chip.ID: {
                 let cdata = this.chips[data];
                 if (cdata == null) return null;

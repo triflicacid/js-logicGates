@@ -22,7 +22,7 @@ class Input extends LabeledComponent {
       if (typeof fn == 'function') {
         fn();
       } else {
-        fill(...app.opts['colour' + this.getState(0)]);
+        fill(...app.opts['colour' + (this.getState(0) ? 1 : 0)]);
         let pad = this.w / 6;
         noStroke();
         rect(-this.w / 2 + pad, -this.h / 2 + pad, this.w - 2 * pad, this.h - 2 * pad, roundness);
@@ -188,9 +188,12 @@ class ConstInput extends Input {
     super.render(() => {
       noStroke();
       fill(...app.opts['colour' + this.getState(0)]);
+      push();
       textSize(35);
       textAlign(CENTER, CENTER);
+      textFont(app.font_clacon2);
       text(this.getState(0), 0, 0);
+      pop();
     }, 0);
   }
 
@@ -310,7 +313,7 @@ class DecimalInput extends LabeledComponent {
   updateOutputs() {
     const bin = this.getBinary();
     for (let i = 0; i < this.outputs.length; i++) {
-      this.setState(i, bin[bin.length - i - 1] == "1");
+      this.setState(i, bin[bin.length - i - 1] === "1" ? 1 : 0);
     }
   }
 

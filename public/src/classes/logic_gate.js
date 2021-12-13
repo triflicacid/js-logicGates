@@ -23,11 +23,11 @@ class LogicGate extends Component {
      * Update component state
      */
     eval() {
-        const a = this.getInputState(0);
+        const a = this.getInputState(0) ? 1 : 0;
         if (this.inputs.length == 1) {
             this.setState(0, LogicGate.data[this._type].fn(a));
         } else {
-            const b = this.getInputState(1);
+            const b = this.getInputState(1) ? 1 : 0;
             this.setState(0, LogicGate.data[this._type].fn(a, b));
         }
     }

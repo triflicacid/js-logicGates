@@ -210,6 +210,14 @@ See circuit `datareader` for an example.
 
 Change data by clicking on the component and enter a comma-seperated list of numerical values.
 
+### Bus: In
+
+Taking N-bit input and pack into a single connection. Connect to `Bus: Out` to extract bits.
+
+### Bus: Out
+
+Extract bits from a numerically packed input from `Bus: In`
+
 # Chips
 
 Chips are circuits which may be included into other circuits
