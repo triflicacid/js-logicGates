@@ -249,7 +249,6 @@ class Workspace {
     evaluate(all = false) {
         if (this.isRunning) {
             if (all) {
-                console.log("Evaluate All")
                 for (let id in this._els) {
                     if (this._els.hasOwnProperty(id) && (this._els[id] instanceof Input || this._els[id] instanceof DecimalInput)) this._els[id].chain_eval();
                 }
