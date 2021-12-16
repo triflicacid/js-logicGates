@@ -315,11 +315,11 @@ class Workspace {
         switch (type) {
             case ToggleInput.ID: {
                 let c = new ToggleInput(x, y);
-                c.setState(0, data);
+                if (data !== undefined && !isNaN(+data)) c.setState(0, data);
                 return c;
             }
             case ConstInput.ID:
-                return new ConstInput(x, y, data);
+                return new ConstInput(x, y, data ? 1 : 0);
             case PushInput.ID:
                 return new PushInput(x, y);
             case DecimalInput.ID: {

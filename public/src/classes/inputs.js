@@ -6,7 +6,7 @@ class Input extends LabeledComponent {
 
   /** Toggle state of Input */
   toggle() {
-    this.setState(0, this.getState(0) ^ 1);
+    this.setState(0, this.getState(0) ? 0 : 1);
   }
 
   /**
